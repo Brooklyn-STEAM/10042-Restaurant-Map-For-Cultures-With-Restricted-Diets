@@ -33,9 +33,8 @@ class User:
     is_anonymous = False
     is_active = True
 
-    def __init__(self, id, username, email, first_name, last_name):
+    def __init__(self, id, email, first_name, last_name):
         self.id = id
-        self.username = username
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
@@ -48,7 +47,7 @@ def load_user(user_id):
     conn = connect_db()
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT * FROM `Customer` WHERE `id` = {user_id}")
+    cursor.execute(f"SELECT * FROM `User` WHERE `id` = {user_id}")
 
     result = cursor.fetchone()
     #if there is no vaule in the requested database vaule a None will be returned
@@ -56,8 +55,7 @@ def load_user(user_id):
     conn.close()
 
     if result is not None:
-        return User(result["id"], result["username"], result["email"], result["first_name"], result["last_name"])
-
+        return User(result["id"], result["email"], result["first_name"], result["last_name"])
 
 #coordinator connect two fuction
 @app.route("/")
@@ -110,21 +108,42 @@ def sign_up_page():
     return render_template("sign_up_page.html.jinja")
 
 
-@app.route("/sign_in")
+@app.route("/sign_in", methods=["POST", "GET"])
 def sign_in_page():
-    conn = connect_db()
-    cursor = conn.cursor()
+    if flask_login.current_user.is_authenticated:
+        return redirect("/")
 
-    cursor.close()
-    conn.close()
+    if request.method == "POST":
+        email = request.form["email"]
+        password = request.form["password"]
+
+        conn = connect_db()
+        cursor = conn.cursor()
+
+        cursor.execute(f"SELECT * FROM `User` WHERE `email` = '{email}'; ")
+        user_data = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+
+        if user_data is None:
+            flash("Your username/password is incorrect")
+
+        elif password != user_data["password"]:
+            flash("Your username/password is incorrect")
+
+        else:
+            user = User(user_data["id"], user_data["email"], user_data["first_name"], user_data["last_name"])
+            flask_login.login_user(user)
+            return redirect('/') 
+    
+    return render_template("sign_in_page.html.jinja")
     
 @app.route('/sign_out')
 @flask_login.login_required
 def sign_out():
     flask_login.logout_user()
     return redirect('/')
-
-
 
 
 
