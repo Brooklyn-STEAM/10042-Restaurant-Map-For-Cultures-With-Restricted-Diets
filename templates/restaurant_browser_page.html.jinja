@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Browser</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    {% include "components/navbar.html.jinja" %}
+    <h1>Browser</h1>
+
+    <form class="container" action="/browse">
+        <div class="input-group mb-3">
+        <input type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search...">
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <main class="container row g-1 row g-md-4 mx-auto">
+        {% for restaurant in basic_restaurant_information %}
+            <div class="col-6 col-md-4">
+                <a href="/product/{{ restaurant['id'] }}" class='text-decoration-none'>
+                    <div class="card">
+                        <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">
+                        <div class="card-body" id='product_card_body'>
+                            <h5 class="card-title">{{ restaurant["name"] }}</h5>
+                            <p class="card-text">${{ restaurant["type"] }}</p>
+                            <p class="card-text">${{ restaurant["price"] }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

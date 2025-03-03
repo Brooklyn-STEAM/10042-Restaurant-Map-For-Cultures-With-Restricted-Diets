@@ -145,6 +145,41 @@ def sign_out():
     flask_login.logout_user()
     return redirect('/')
 
+@app.route('/restaurant_browser', methods=["POST", "GET"])
+@flask_login.login_required
+def restaurant_browser():
+    conn = connect_db()
+    cursor = conn.cursor()
+    user_id = flask_login.current_user.id
+
+    # All Restaurant
+    cursor.execute(f"""
+        SELECT 
+            `name`, 
+            `type`, 
+            `cost`,
+            `image`
+        FROM `Restaurant`
+    """)
+    basic_restaurant_information = cursor.fetchall()
+
+    # Favorite Restaurant
+    cursor.execute(f"""
+        SELECT 
+            `name`, 
+            `type`, 
+            `cost`,
+            `image`
+        FROM `Restaurant`
+        JOIN 
+        WHERE `user_id` = {user_id}
+    """)
+    favorite = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("restaurant_browser_page.html.jinja", basic_restaurant_information = basic_restaurant_information)
 
 
 
@@ -154,7 +189,6 @@ def sign_out():
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
-    customer_id = flask_login.current_user.id
 
     cursor.close()
     conn.close()
@@ -172,14 +206,3 @@ def map_page():
     #     result = cursor.fetchone()
 #     cursor.close()
 #     conn.close()
-
-
-
-
-
-
-
-
-
-
-
