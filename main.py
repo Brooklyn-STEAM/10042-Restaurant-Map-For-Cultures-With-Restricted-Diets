@@ -150,39 +150,113 @@ def sign_out():
 def restaurant_browser():
     conn = connect_db()
     cursor = conn.cursor()
+    current_user_id = flask_login.current_user.id
+    
+    query = request.args.get("query")
+    
+    if query == None:
+        cursor.execute(f"""
+            SELECT Restaurant.id as restaurant_id, 
+                    name, 
+                    type, 
+                    cost, 
+                    image, 
+                    FavoriteRestaurants.id as favorite_restaurants_id,
+                    FavoriteRestaurants.user_id 
+            FROM Restaurant 
+            LEFT JOIN FavoriteRestaurants 
+                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                    AND FavoriteRestaurants.user_id = {current_user_id};
+        """)
+        restaurant_information = cursor.fetchall()
+        search_information = None
+    else:
+        cursor.execute(f"""
+            SELECT Restaurant.id as restaurant_id, 
+                    name, 
+                    type, 
+                    cost, 
+                    image, 
+                    FavoriteRestaurants.id as favorite_restaurants_id,
+                    FavoriteRestaurants.user_id 
+            FROM Restaurant 
+            LEFT JOIN FavoriteRestaurants 
+                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                    AND FavoriteRestaurants.user_id = {current_user_id};
+        """)
+        restaurant_information = cursor.fetchall()
+
+        cursor.execute(f"""
+            SELECT Restaurant.id as restaurant_id, 
+                    name, 
+                    address,
+                    type, 
+                    cost, 
+                    description,
+                    image, 
+                    tags,
+                    FavoriteRestaurants.id as favorite_restaurants_id,
+                    FavoriteRestaurants.user_id 
+            FROM Restaurant 
+            LEFT JOIN FavoriteRestaurants 
+                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                    AND FavoriteRestaurants.user_id = {current_user_id}
+            WHERE 
+                `name` LIKE '%{query}%' 
+                OR 
+                `address` LIKE '%{query}%' 
+                OR 
+                `type` LIKE '%{query}%'
+                OR
+                `cost` LIKE '%{query}%' 
+                OR 
+                `description` LIKE '%{query}%' 
+                OR 
+                `tags` LIKE '%{query}%';
+        """)
+        #cost search isn't working
+        search_information = cursor.fetchall()
+    
+    cursor.close()
+    conn.close()
+
+    return render_template("restaurant_browser_page.html.jinja", 
+                           restaurant_information = restaurant_information,
+                           search_information = search_information)
+
+@app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
+@flask_login.login_required
+def insert_favorite(restaurant_id):
+    conn = connect_db()
+    cursor = conn.cursor()
     user_id = flask_login.current_user.id
 
-    # All Restaurant
     cursor.execute(f"""
-        SELECT 
-            `name`, 
-            `type`, 
-            `cost`,
-            `image`
-        FROM `Restaurant`
+    INSERT INTO FavoriteRestaurants 
+        ( user_id , restaurant_id )
+    VALUES
+        ( {user_id}, {restaurant_id} ) ;
     """)
-    basic_restaurant_information = cursor.fetchall()
-
-    # Favorite Restaurant
-    cursor.execute(f"""
-        SELECT 
-            `name`, 
-            `type`, 
-            `cost`,
-            `image`
-        FROM `Restaurant`
-        JOIN 
-        WHERE `user_id` = {user_id}
-    """)
-    favorite = cursor.fetchall()
 
     cursor.close()
     conn.close()
 
-    return render_template("restaurant_browser_page.html.jinja", basic_restaurant_information = basic_restaurant_information)
+    return redirect("/restaurant_browser")
 
+@app.route('/restaurant_browser/delete_favorite/<favorite_id>', methods=["POST", "GET"])
+@flask_login.login_required
+def delete_favorite(favorite_id):
+    conn = connect_db()
+    cursor = conn.cursor()
 
+    cursor.execute(f"""
+        DELETE FROM `FavoriteRestaurants` WHERE `id` = {favorite_id};
+    """)
 
+    cursor.close()
+    conn.close()
+
+    return redirect("/restaurant_browser")
 
 @app.route("/map")
 @flask_login.login_required

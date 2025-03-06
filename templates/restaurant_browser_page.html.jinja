@@ -10,24 +10,110 @@
 <body>
     {% include "components/navbar.html.jinja" %}
     <h1>Browser</h1>
+    <div>
+        <form class="container" action="/restaurant_browser">
+            <div class="input-group mb-3">
+                <input type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search...">
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </div>
+        </form>
+        {% if search_information != none %}
+            <div class="container row g-1 row g-md-4 mx-auto">
+                <h2>Search Results</h2>
+                {% for restaurant in search_information %}
+                    <div class="col-6 col-md-4">
+                        {% if restaurant["user_id"] == current_user.id %}
+                            <form action="/restaurant_browser/delete_favorite/{{ restaurant['favorite_restaurants_id'] }}" method="post">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                                        <path d="M4.036 1a4.036 4.036 0 00-2.854 6.89l5.964 5.964a.5.5 0 00.708 0l5.964-5.965a4.036 4.036 0 00-5.707-5.707l-.611.61-.61-.61A4.036 4.036 0 004.035 1z" fill="currentColor"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="/restaurant_browser/insert_favorite/{{ restaurant['restaurant_id'] }}" method="post">
+                                <button type="submit" class="btn btn-primary">
+                                    <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                                        <path d="M7.5 13.5l-.354.354a.5.5 0 00.708 0L7.5 13.5zM1.536 7.536l-.354.353.354-.353zm5-5l-.354.353.354-.353zM7.5 3.5l-.354.354a.5.5 0 00.708 0L7.5 3.5zm.964-.964l-.353-.354.353.354zm-.61 10.61L1.889 7.182l-.707.707 5.964 5.965.708-.708zm5.257-5.964l-5.965 5.964.708.708 5.964-5.965-.707-.707zM6.182 2.889l.964.965.708-.708-.965-.964-.707.707zm1.672.965l.964-.965-.707-.707-.965.964.708.708zM10.964 1c-1.07 0-2.096.425-2.853 1.182l.707.707A3.037 3.037 0 0110.964 2V1zM14 5.036c0 .805-.32 1.577-.89 2.146l.708.707A4.036 4.036 0 0015 5.036h-1zm1 0A4.036 4.036 0 0010.964 1v1A3.036 3.036 0 0114 5.036h1zM4.036 2c.805 0 1.577.32 2.146.89l.707-.708A4.036 4.036 0 004.036 1v1zM1 5.036A3.036 3.036 0 014.036 2V1A4.036 4.036 0 000 5.036h1zm.89 2.146A3.035 3.035 0 011 5.036H0c0 1.07.425 2.096 1.182 2.853l.707-.707z" fill="currentColor"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        {% endif %}
+                        <a href="/product/{{ restaurant['restaurant_id'] }}" class='text-decoration-none'>
+                            <div class="card">
+                                <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">
+                                <div class="card-body" id='product_card_body'>
+                                    <h5 class="card-title">{{ restaurant["name"] }}</h5>
+                                    <p class="card-text">Type: {{ restaurant["type"] }}</p>
+                                    <p class="card-text">${{ restaurant["cost"] }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 
-    <form class="container" action="/browse">
-        <div class="input-group mb-3">
-        <input type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search...">
-        <button class="btn btn-outline-secondary" type="submit">Search</button>
-        </div>
-    </form>
+    <hr>
+
+    <div class="container row g-1 row g-md-4 mx-auto">
+        <h2>Favorites</h2>
+        {% for restaurant in restaurant_information %}
+            {% if restaurant["user_id"] == current_user.id %}  
+                <div class="col-6 col-md-4">
+                    <form action="/restaurant_browser/delete_favorite/{{ restaurant['favorite_restaurants_id'] }}" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                                <path d="M4.036 1a4.036 4.036 0 00-2.854 6.89l5.964 5.964a.5.5 0 00.708 0l5.964-5.965a4.036 4.036 0 00-5.707-5.707l-.611.61-.61-.61A4.036 4.036 0 004.035 1z" fill="currentColor"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    <a href="/product/{{ restaurant['restaurant_id'] }}" class='text-decoration-none'>
+                        <div class="card">
+                            <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">
+                            <div class="card-body" id='product_card_body'>
+                                <h5 class="card-title">{{ restaurant["name"] }}</h5>
+                                <p class="card-text">Type: {{ restaurant["type"] }}</p>
+                                <p class="card-text">${{ restaurant["cost"] }}</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <hr>
 
     <main class="container row g-1 row g-md-4 mx-auto">
-        {% for restaurant in basic_restaurant_information %}
+        <h2>Recommendations</h2>
+        {% for restaurant in restaurant_information %}
             <div class="col-6 col-md-4">
-                <a href="/product/{{ restaurant['id'] }}" class='text-decoration-none'>
+                {% if restaurant["user_id"] == current_user.id %}
+                    <form action="/restaurant_browser/delete_favorite/{{ restaurant['favorite_restaurants_id'] }}" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                                <path d="M4.036 1a4.036 4.036 0 00-2.854 6.89l5.964 5.964a.5.5 0 00.708 0l5.964-5.965a4.036 4.036 0 00-5.707-5.707l-.611.61-.61-.61A4.036 4.036 0 004.035 1z" fill="currentColor"></path>
+                            </svg>
+                        </button>
+                    </form>
+                {% else %}
+                    <form action="/restaurant_browser/insert_favorite/{{ restaurant['restaurant_id'] }}" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                                <path d="M7.5 13.5l-.354.354a.5.5 0 00.708 0L7.5 13.5zM1.536 7.536l-.354.353.354-.353zm5-5l-.354.353.354-.353zM7.5 3.5l-.354.354a.5.5 0 00.708 0L7.5 3.5zm.964-.964l-.353-.354.353.354zm-.61 10.61L1.889 7.182l-.707.707 5.964 5.965.708-.708zm5.257-5.964l-5.965 5.964.708.708 5.964-5.965-.707-.707zM6.182 2.889l.964.965.708-.708-.965-.964-.707.707zm1.672.965l.964-.965-.707-.707-.965.964.708.708zM10.964 1c-1.07 0-2.096.425-2.853 1.182l.707.707A3.037 3.037 0 0110.964 2V1zM14 5.036c0 .805-.32 1.577-.89 2.146l.708.707A4.036 4.036 0 0015 5.036h-1zm1 0A4.036 4.036 0 0010.964 1v1A3.036 3.036 0 0114 5.036h1zM4.036 2c.805 0 1.577.32 2.146.89l.707-.708A4.036 4.036 0 004.036 1v1zM1 5.036A3.036 3.036 0 014.036 2V1A4.036 4.036 0 000 5.036h1zm.89 2.146A3.035 3.035 0 011 5.036H0c0 1.07.425 2.096 1.182 2.853l.707-.707z" fill="currentColor"></path>
+                            </svg>
+                        </button>
+                    </form>
+                {% endif %}
+                <a href="/product/{{ restaurant['restaurant_id'] }}" class='text-decoration-none'>
                     <div class="card">
                         <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">
                         <div class="card-body" id='product_card_body'>
                             <h5 class="card-title">{{ restaurant["name"] }}</h5>
-                            <p class="card-text">${{ restaurant["type"] }}</p>
-                            <p class="card-text">${{ restaurant["price"] }}</p>
+                            <p class="card-text">Type: {{ restaurant["type"] }}</p>
+                            <p class="card-text">${{ restaurant["cost"] }}</p>
                         </div>
                     </div>
                 </a>
