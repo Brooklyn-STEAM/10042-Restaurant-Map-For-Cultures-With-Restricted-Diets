@@ -153,6 +153,8 @@ def restaurant_browser():
     current_user_id = flask_login.current_user.id
     
     query = request.args.get("query")
+    if query == "":
+        query = None
     
     if query == None:
         cursor.execute(f"""

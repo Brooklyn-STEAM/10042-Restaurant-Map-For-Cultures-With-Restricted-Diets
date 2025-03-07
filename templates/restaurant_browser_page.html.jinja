@@ -13,7 +13,8 @@
     <div>
         <form class="container" action="/restaurant_browser">
             <div class="input-group mb-3">
-                <input type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search...">
+                <input id="restaurantBrowserSearchBar" type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search..." value="{{ request.args.get('query', '') }}">
+                <input class="btn btn-outline-secondary" onclick="clearSearchBar()" type="button" value="X">
                 <button class="btn btn-outline-secondary" type="submit">Search</button>
             </div>
         </form>
@@ -45,12 +46,19 @@
                                 <div class="card-body" id='product_card_body'>
                                     <h5 class="card-title">{{ restaurant["name"] }}</h5>
                                     <p class="card-text">Type: {{ restaurant["type"] }}</p>
-                                    <p class="card-text">${{ restaurant["cost"] }}</p>
+                                    <p class="card-text">Cost: ${{ restaurant["cost"] }}</p>
                                 </div>
                             </div>
                         </a>
                     </div>
                 {% endfor %}
+            </div>
+        {% elif request.args.get('query') == none %}
+            <div class="container row g-1 row g-md-4 mx-auto">
+                <h2>Search Results</h2>
+                <div>
+                    <p>No Match</p>
+                </div>
             </div>
         {% endif %}
     </div>
@@ -75,7 +83,7 @@
                             <div class="card-body" id='product_card_body'>
                                 <h5 class="card-title">{{ restaurant["name"] }}</h5>
                                 <p class="card-text">Type: {{ restaurant["type"] }}</p>
-                                <p class="card-text">${{ restaurant["cost"] }}</p>
+                                <p class="card-text">Cost: ${{ restaurant["cost"] }}</p>
                             </div>
                         </div>
                     </a>
@@ -113,13 +121,14 @@
                         <div class="card-body" id='product_card_body'>
                             <h5 class="card-title">{{ restaurant["name"] }}</h5>
                             <p class="card-text">Type: {{ restaurant["type"] }}</p>
-                            <p class="card-text">${{ restaurant["cost"] }}</p>
+                            <p class="card-text">Cost: ${{ restaurant["cost"] }}</p>
                         </div>
                     </div>
                 </a>
             </div>
         {% endfor %}
     </main>
+    <script src="/static/javascript/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
