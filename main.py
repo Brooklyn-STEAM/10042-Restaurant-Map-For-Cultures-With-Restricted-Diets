@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, flash, abort
 import pymysql
 from dynaconf import Dynaconf
 import flask_login
-import datetime
 
 app = Flask(__name__) 
 
@@ -259,6 +258,20 @@ def delete_favorite(favorite_id):
     conn.close()
 
     return redirect("/restaurant_browser")
+
+@app.route("/individual_restaurant/<restaurant_id>")
+@flask_login.login_required
+def individual_restaurant(restaurant_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    cursor.execute(f"SELECT * FROM `Restaurant` WHERE `Restaurant`.`id` = {restaurant_id} ;")
+    restaurant_information = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+    return render_template("individual_restaurant_page.html.jinja", 
+                           restaurant_information = restaurant_information)
 
 @app.route("/map")
 @flask_login.login_required
