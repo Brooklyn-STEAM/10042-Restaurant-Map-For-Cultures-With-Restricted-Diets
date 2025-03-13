@@ -32,11 +32,14 @@ class User:
     is_anonymous = False
     is_active = True
 
-    def __init__(self, id, email, first_name, last_name):
+    def __init__(self, id, email, first_name, middle_name, last_name, preferred_name ):
         self.id = id
         self.email = email
         self.first_name = first_name
+        self.middle_name = middle_name
         self.last_name = last_name
+        self.preferred_name = preferred_name 
+
 
     def get_id(self):
         return str(self.id)
@@ -54,7 +57,7 @@ def load_user(user_id):
     conn.close()
 
     if result is not None:
-        return User(result["id"], result["email"], result["first_name"], result["last_name"])
+        return User(result["id"], result["email"], result["first_name"], result["middle_name"], result["last_name"], result["preferred_name"])
 
 #coordinator connect two fuction
 @app.route("/")
@@ -126,10 +129,10 @@ def sign_in_page():
         conn.close()
 
         if user_data is None:
-            flash("Your username/password is incorrect")
+            flash("Your email/password is incorrect")
 
         elif password != user_data["password"]:
-            flash("Your username/password is incorrect")
+            flash("Your email/password is incorrect")
 
         else:
             user = User(user_data["id"], user_data["email"], user_data["first_name"], user_data["last_name"])
@@ -264,14 +267,119 @@ def delete_favorite(favorite_id):
 def individual_restaurant(restaurant_id):
     conn = connect_db()
     cursor = conn.cursor()
+    user_id = flask_login.current_user.id
+
 
     cursor.execute(f"SELECT * FROM `Restaurant` WHERE `Restaurant`.`id` = {restaurant_id} ;")
     restaurant_information = cursor.fetchone()
 
+    cursor.execute(f"""
+                    SELECT 
+                        rating, title, text, Review.date, Review.user_id as reviewer_id,
+                        User.first_name,User.middle_name, User.last_name, User.preferred_name 
+                    FROM Review 
+                    JOIN User 
+                        ON User.id = Review.user_id 
+                    WHERE restaurant_id = {restaurant_id};
+                """)
+    review_information = cursor.fetchall()
+    def return_current_user_review():
+        for review in review_information: 
+            if review["reviewer_id"] == user_id:
+                return review
+
+
+    current_user_review = return_current_user_review()
+
+    total_stars = 0
+    total_zero_stars = 0
+    total_one_stars = 0
+    total_two_stars = 0
+    total_three_stars = 0
+    total_four_stars = 0
+    total_five_stars = 0
+    for review in review_information:
+        total_stars += review["rating"]
+        if review["rating"] == 0:
+            total_zero_stars += 1
+        elif review["rating"] == 1:
+            total_one_stars += 1
+        elif review["rating"] == 2:
+            total_two_stars += 1
+        elif review["rating"] == 3:
+            total_three_stars += 1
+        elif review["rating"] == 4:
+            total_four_stars += 1
+        elif review["rating"] == 5:
+            total_five_stars += 1
+
+    average_stars = total_stars/len(review_information)
+    total_of_each_star_count_list = [total_zero_stars, 
+                                total_one_stars, 
+                                total_two_stars, 
+                                total_three_stars, 
+                                total_four_stars, 
+                                total_five_stars]
+
     cursor.close()
     conn.close()
     return render_template("individual_restaurant_page.html.jinja", 
-                           restaurant_information = restaurant_information)
+                           restaurant_information = restaurant_information,
+                           review_information = review_information, 
+                           current_user_review = current_user_review,
+                           average_stars = average_stars,
+                           total_of_each_star_count_list = total_of_each_star_count_list)
+
+@app.route("/individual_restaurant/<restaurant_id>/review_insert/", methods=["POST", "GET"])
+@flask_login.login_required
+def restaurant_review_insert(restaurant_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    user_id = flask_login.current_user.id
+    restaurant_review_user_rating = request.form["restaurant_review_user_rating"]
+    restaurant_review_title = request.form["restaurant_review_title"]
+    restaurant_review_text = request.form["restaurant_review_text"]
+
+    cursor.execute(f"""INSERT 
+                    INTO `Review` 
+                        (`user_id`, `restaurant_id`, `rating`, `title`, `text`) 
+                    VALUES 
+                        ('{user_id}','{restaurant_id}','{restaurant_review_user_rating}','{restaurant_review_title}', '{restaurant_review_text}') ;
+                   """)
+
+    cursor.close()
+    conn.close()
+    return redirect(f"/individual_restaurant/{restaurant_id}")
+
+@app.route("/individual_restaurant/<restaurant_id>/review_update/", methods=["POST", "GET"])
+@flask_login.login_required
+def restaurant_review_update(restaurant_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    user_id = flask_login.current_user.id
+    restaurant_review_user_rating = request.form["restaurant_review_user_rating"]
+    restaurant_review_title = request.form["restaurant_review_title"]
+    restaurant_review_text = request.form["restaurant_review_text"]
+
+    cursor.execute(f"""
+                   UPDATE Review 
+                   SET 
+                        rating = {restaurant_review_user_rating}, 
+                        title = '{restaurant_review_title}', 
+                        text = '{restaurant_review_text}',
+                        date = CURRENT_TIMESTAMP
+                   WHERE 
+                        user_id = {user_id} 
+                        AND 
+                        restaurant_id = {restaurant_id};
+                """)
+
+    cursor.close()
+    conn.close()
+    return redirect(f"/individual_restaurant/{restaurant_id}")
+
 
 @app.route("/map")
 @flask_login.login_required

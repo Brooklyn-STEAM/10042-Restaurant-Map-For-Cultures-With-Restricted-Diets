@@ -6,11 +6,10 @@
     <title>Individual Restaurants</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="/static/css/style.css" rel="stylesheet">
 </head>
 <body>
     {% include "components/navbar.html.jinja" %}
-    {{ restaurant_information }}
-
     <main>
         <h2>{{ restaurant_information["name"] }}</h2>
         <div class="container">
@@ -30,6 +29,131 @@
         </div>
     </main>
     
+    <hr>
+
+    <section id="restaurantReview">
+        {% if current_user_review != none %}
+            <form class="card" action="/individual_restaurant/{{ restaurant_information['id'] }}/review_update" method="post">
+                <h5 class="card-header row">
+                    <div class="col">
+                        {% with preferred_name = current_user.preferred_name, first_name = current_user.first_name, middle_name = current_user.middle_name, last_name = current_user.last_name %}
+                            {% include '/components/display_name.html.jinja' %}
+                        {% endwith %}
+                    </div>
+                    <div class="col">
+                        <label for="userRating">Rating: </label>
+                        <input id="userRating" name="restaurant_review_user_rating" type="number" required value="{{ current_user_review['rating'] }}">
+                    </div>
+                    <div class="col">
+                        From: {{ current_user_review["date"] }}
+                    </div>
+                </h5>
+                <h6 class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Title</span>
+                    <input name="restaurant_review_title" type="text" class="form-control" aria-label="Title" aria-describedby="basic-addon1" required value="{{ current_user_review['title'] }}">
+                </h6>
+                <div class="input-group">
+                    <span class="input-group-text card-text">With textarea</span>
+                    <textarea class="form-control" aria-label="With textarea" name="restaurant_review_text" required>{{ current_user_review['text'] }}</textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        {% else %}
+            <form class="card" action="/individual_restaurant/{{ restaurant_information['id'] }}/review_insert" method="post">
+                
+                <h5 class="card-header row">
+                    <div class="col">
+                        {% with preferred_name = current_user.preferred_name, first_name = current_user.first_name, middle_name = current_user.middle_name, last_name = current_user.last_name %}
+                            {% include '/components/display_name.html.jinja' %}
+                        {% endwith %}
+                    </div>
+                    <div class="col">
+                        <label for="userRating">Rating: </label>
+                        <input id="userRating" name="restaurant_review_user_rating" type="number" required>
+                    </div>               
+                </h5>
+                <h6 class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Title</span>
+                    <input name="restaurant_review_title" type="text" class="form-control" aria-label="Title" aria-describedby="basic-addon1" required>
+                </h6>
+                
+                <div class="input-group">
+                    <span class="input-group-text card-text">Comments</span>
+                    <textarea class="form-control" aria-label="With textarea" name="restaurant_review_text" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit</button>
+
+            </form>
+        {% endif %}
+        <div class="row">
+            <div class="col-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <div>
+                                Average: {{ average_stars|round(1) }}
+                            </div>
+                            <div>
+                                {% with star_count = average_stars|round|int %}
+                                    {% include '/components/review_stars_out_of_five.html.jinja' %}
+                                {% endwith %}
+                            </div>
+                        </h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">
+                            Reviews: {{ review_information|length }}
+                        </h6>
+                        <div class="card-text">
+                            {% for n in range(6) %}
+                                <div class="row">
+                                    <div class="col-4">
+                                        <p>
+                                            {{ total_of_each_star_count_list[n] }}
+                                        </p>
+                                    </div>
+                                    <div class="col">
+                                        {% with star_count = n %}
+                                            {% include '/components/review_stars_out_of_five.html.jinja' %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>            
+            </div>
+            <div class="col">
+                {% for review in review_information %}
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <div class="row">
+
+                                    <div class="col">
+                                        {% with preferred_name = review["preferred_name"], first_name = review["first_name"], middle_name = review["middle_name"], last_name = review["last_name"] %}
+                                            {% include '/components/display_name.html.jinja' %}
+                                        {% endwith %}
+                                    </div>
+                                    <div class="col">
+                                        {% with star_count = review["rating"] %}
+                                            {% include '/components/review_stars_out_of_five.html.jinja' %}
+                                        {% endwith %}
+                                    </div>
+                                    <div class="col">
+                                        {{ review["date"] }}
+                                    </div>
+
+                                </div>
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">{{ review["title"] }}</h6>
+                            <p class="card-text">{{ review["text"] }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
