@@ -131,15 +131,14 @@ def sign_out():
 
 
 @app.route("/map")
-@flask_login.login_required
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
-    customer_id = flask_login.current_user.id
+   
 
     cursor.close()
     conn.close()
-
+    return render_template("map.html.jinja")
 
 # @app.route("/cart")
 # @flask_login.login_required
