@@ -135,7 +135,24 @@ def sign_in_page():
             flash("Your email/password is incorrect")
 
         else:
-            user = User(user_data["id"], user_data["email"], user_data["first_name"], user_data["last_name"])
+            user = User(user_data["id"], 
+                        user_data["email"], 
+                        user_data["first_name"], 
+                        user_data["middle_name"], 
+                        user_data["last_name"],
+                        user_data["preferred_name"])
+            # use if all user information is needed
+            # user = User(user_data["id"], 
+            #             user_data["email"], 
+            #             user_data["password"], 
+            #             user_data["first_name"], 
+            #             user_data["middle_name"], 
+            #             user_data["last_name"], 
+            #             user_data["preferred_name"], 
+            #             user_data["phone_number"], 
+            #             user_data["address"], 
+            #             user_data["profile_image"], 
+            #             user_data["date"],)
             flask_login.login_user(user)
             return redirect('/') 
     
