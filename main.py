@@ -16,7 +16,7 @@ login_manager.init_app(app)
 login_manager.login_view = ('/sign_in')
 
 def connect_db():
-    conn =pymysql.connect(
+    conn = pymysql.connect(
         host="db.steamcenter.tech",
         database="dish_map",
         user='bwang',
@@ -43,6 +43,31 @@ class User:
 
     def get_id(self):
         return str(self.id)
+    
+# class DietaryRestriction:
+#     def __init__(self, id, name, description):
+#         self.id = id
+#         self.name = name
+#         self.description = description
+
+#     def get_id(self):
+#         return str(self.id)
+#     def get_name(self):
+#         return str(self.name)
+#     def get_description(self):
+#         return str(self.description)
+    
+# def load_dietary_restriction():
+#     conn = connect_db()
+#     cursor = conn.cursor()
+
+#     cursor.execute(f"SELECT * FROM `DietaryRestriction`")
+#     dietary_restriction_data = cursor.fetchall()
+
+#     cursor.close()
+#     conn.close()
+
+#     return DietaryRestriction(dietary_restriction_data["id"], dietary_restriction_data["name"], dietary_restriction_data["description"])
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -109,7 +134,6 @@ def sign_up_page():
 
     return render_template("sign_up_page.html.jinja")
 
-
 @app.route("/sign_in", methods=["POST", "GET"])
 def sign_in_page():
     if flask_login.current_user.is_authenticated:
@@ -172,41 +196,9 @@ def restaurant_browser():
     current_user_id = flask_login.current_user.id
     
     query = request.args.get("query")
-    if query == "":
-        query = None
-    
-    if query == None:
-        cursor.execute(f"""
-            SELECT Restaurant.id as restaurant_id, 
-                    name, 
-                    type, 
-                    cost, 
-                    image, 
-                    FavoriteRestaurants.id as favorite_restaurants_id,
-                    FavoriteRestaurants.user_id 
-            FROM Restaurant 
-            LEFT JOIN FavoriteRestaurants 
-                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                    AND FavoriteRestaurants.user_id = {current_user_id};
-        """)
-        restaurant_information = cursor.fetchall()
-        search_information = None
-    else:
-        cursor.execute(f"""
-            SELECT Restaurant.id as restaurant_id, 
-                    name, 
-                    type, 
-                    cost, 
-                    image, 
-                    FavoriteRestaurants.id as favorite_restaurants_id,
-                    FavoriteRestaurants.user_id 
-            FROM Restaurant 
-            LEFT JOIN FavoriteRestaurants 
-                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                    AND FavoriteRestaurants.user_id = {current_user_id};
-        """)
-        restaurant_information = cursor.fetchall()
 
+    if query != None: 
+        dietary_restriction_radio = request.args.get("dietary_restriction_radio")
         cursor.execute(f"""
             SELECT Restaurant.id as restaurant_id, 
                     name, 
@@ -233,17 +225,44 @@ def restaurant_browser():
                 OR 
                 `description` LIKE '%{query}%' 
                 OR 
-                `tags` LIKE '%{query}%';
+                `tags` LIKE '%{query}%'
+            JOIN `RestaurantDietaryRestriction` 
+                ON `Restaurant`.`id`
+                    AND `RestaurantDietaryRestriction`.`dietary_restriction_id` = {dietary_restriction_radio};
         """)
-        #cost search isn't working
+
+
         search_information = cursor.fetchall()
+    else:
+        search_information = None
     
+    # Favorite Recommendation
+    cursor.execute(f"""
+        SELECT Restaurant.id as restaurant_id, 
+                name, 
+                type, 
+                cost, 
+                image, 
+                FavoriteRestaurants.id as favorite_restaurants_id,
+                FavoriteRestaurants.user_id 
+        FROM Restaurant 
+        LEFT JOIN FavoriteRestaurants 
+            ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                AND FavoriteRestaurants.user_id = {current_user_id};
+    """)
+    restaurant_information = cursor.fetchall()
+
+    # Dietary Restriction
+    cursor.execute("SELECT * FROM DietaryRestriction")
+    dietary_restriction_list = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
     return render_template("restaurant_browser_page.html.jinja", 
                            restaurant_information = restaurant_information,
-                           search_information = search_information)
+                           search_information = search_information, 
+                           dietary_restriction_list = dietary_restriction_list)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
 @flask_login.login_required
