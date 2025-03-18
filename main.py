@@ -390,6 +390,11 @@ def map_page():
     cursor.close()
     conn.close()
 
+@app.route("/contact_page")
+@flask_login.login_required
+def contact_page():
+    return render_template("/contact_page.html.jinja")
+
 
 # @app.route("/cart")
 # @flask_login.login_required
