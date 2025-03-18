@@ -1,0 +1,9 @@
+<div>
+    {% if preferred_name != none %}
+        {{ preferred_name }}
+    {% else %}
+        {{ first_name }}
+        {{ middle_name }}
+        {{ last_name }}
+    {% endif %}
+</div>

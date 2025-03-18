@@ -2,7 +2,7 @@
 
   <div class="container-fluid">
     <a class="navbar-brand" href="#">
-            <img src="/static/images/Untitled (3).png" alt="Logo" width="150" class="d-inline-block align-text-top">
+      <img src="/static/images/Untitled (3).png" alt="Logo" width="150" class="d-inline-block align-text-top">
 
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,6 +25,31 @@
         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>
+      
+      {# Authentication #}
+      <div class="ps-lg-5">
+        {% if current_user.is_authenticated %}
+          <div class="btn-group">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+              {{ current_user.first_name + current_user.last_name }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-lg-end">
+              <li><a class="dropdown-item" href="/sign_out">Sign Out</a></li>
+            </ul>
+          </div>
+        {% else %}
+          <div class="btn-group">
+            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+              Account
+            </button>
+            <ul class="dropdown-menu dropdown-menu-lg-end">
+              <li><a class="dropdown-item" href="/sign_in">Sign In</a></li>
+              <li><a class="dropdown-item" href="/sign_up">Sign Up</a></li>
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+
     </div>
   </div>
 </nav>
