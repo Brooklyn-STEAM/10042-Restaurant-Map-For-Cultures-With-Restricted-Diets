@@ -93,10 +93,17 @@
                     <div class="card-body">
                         <h5 class="card-title">
                             <div>
-                                Average: {{ average_stars|round(1) }}
+                                <p>
+                                    <span>Average: </span>
+                                    {% if average_stars != none %}
+                                        {{ average_stars|round(1) }}
+                                    {% else %}
+                                        <span> -- </span>
+                                    {% endif %}
+                                </p> 
                             </div>
                             <div>
-                                {% with star_count = average_stars|round|int %}
+                                {% with star_count = average_stars %}
                                     {% include '/components/review_stars_out_of_five.html.jinja' %}
                                 {% endwith %}
                             </div>
