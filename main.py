@@ -1,12 +1,65 @@
-def sql_generator_WHERE_conditions(clause_condition, conjunction, operator, column_name_list, variable):
-    sql_generator_list = []
-    for column_name in column_name_list:
-        sql_generator_list.append( column_name + f" {operator} " + f"'%{variable}%'")
-    if clause_condition == None:
-        return " (" + f" {conjunction} ".join(sql_generator_list) + ")"
-    else:
-        return " " + clause_condition + " (" + f" {conjunction} ".join(sql_generator_list) + ")"
 # '%%' look for stuff between words
+def search_result_return(cursor, base_restaurant_information_sql):
+    query = request.args.get("query")
+    if query == "":
+        query = None
+
+    dietary_restriction_radio = request.args.get("dietary_restriction_radio")
+    if dietary_restriction_radio == "":
+        dietary_restriction_radio = None
+
+    price_min_filter = request.args.get('price_min_filter')
+    if price_min_filter == "":
+        price_min_filter = None
+    
+    price_max_filter = request.args.get('price_max_filter')
+    if price_max_filter == "":
+        price_max_filter = None
+    
+    search_restaurant_information_sql = base_restaurant_information_sql
+    
+    search_WHERE_present = False
+    if dietary_restriction_radio != None:
+        RestaurantDietaryRestriction_JOIN_sql = """
+                                                JOIN RestaurantDietaryRestriction
+                                                    ON Restaurant.id = RestaurantDietaryRestriction.restaurant_id
+                                                """
+        WHERE_conditions_sql_radio = f"""(
+                                            RestaurantDietaryRestriction.dietary_restriction_id = {dietary_restriction_radio}
+                                        )"""
+        
+        search_restaurant_information_sql += " " + RestaurantDietaryRestriction_JOIN_sql + " WHERE " + WHERE_conditions_sql_radio
+        
+        search_WHERE_present = True
+        
+    if query != None: 
+        WHERE_conditions_sql_query = f"""(
+                                            (`name` LIKE '%{query}%') 
+                                            OR 
+                                            (`address` LIKE '%{query}%')
+                                            OR 
+                                            (`type` LIKE '%{query}%') 
+                                            OR 
+                                            (`cost` LIKE '%{query}%' )
+                                            OR 
+                                            (`description` LIKE '%{query}%') 
+                                            OR 
+                                            (`tags` LIKE '%{query}%')
+                                        )"""
+        if search_WHERE_present:
+            search_restaurant_information_sql += " AND " + WHERE_conditions_sql_query
+        else:
+            search_restaurant_information_sql += " WHERE " + WHERE_conditions_sql_query
+            search_WHERE_present = True
+        
+    
+    if search_WHERE_present:
+        search_restaurant_information_sql += ";"
+        cursor.execute(search_restaurant_information_sql)
+        return cursor.fetchall()
+    else:
+        return None
+
 from flask import Flask, render_template, request, redirect, flash, abort
 import pymysql
 from dynaconf import Dynaconf
@@ -36,6 +89,7 @@ def connect_db():
 
     return conn
 
+
 class User:
     is_authenticated = True
     is_anonymous = False
@@ -49,35 +103,8 @@ class User:
         self.last_name = last_name
         self.preferred_name = preferred_name 
 
-
     def get_id(self):
         return str(self.id)
-    
-# class DietaryRestriction:
-#     def __init__(self, id, name, description):
-#         self.id = id
-#         self.name = name
-#         self.description = description
-
-#     def get_id(self):
-#         return str(self.id)
-#     def get_name(self):
-#         return str(self.name)
-#     def get_description(self):
-#         return str(self.description)
-    
-# def load_dietary_restriction():
-#     conn = connect_db()
-#     cursor = conn.cursor()
-
-#     cursor.execute(f"SELECT * FROM `DietaryRestriction`")
-#     dietary_restriction_data = cursor.fetchall()
-
-#     cursor.close()
-#     conn.close()
-
-#     return DietaryRestriction(dietary_restriction_data["id"], dietary_restriction_data["name"], dietary_restriction_data["description"])
-
 @login_manager.user_loader
 def load_user(user_id):
     conn = connect_db()
@@ -92,6 +119,7 @@ def load_user(user_id):
 
     if result is not None:
         return User(result["id"], result["email"], result["first_name"], result["middle_name"], result["last_name"], result["preferred_name"])
+
 
 #coordinator connect two fuction
 @app.route("/")
@@ -205,7 +233,7 @@ def restaurant_browser():
     current_user_id = flask_login.current_user.id
     
     base_restaurant_information_sql = f"""
-                SELECT Restaurant.id as restaurant_id, 
+                SELECT Restaurant.id as restaurant_id,
                         name, 
                         type, 
                         cost, 
@@ -217,47 +245,11 @@ def restaurant_browser():
                     ON Restaurant.id = FavoriteRestaurants.restaurant_id 
                         AND FavoriteRestaurants.user_id = {current_user_id}
                 """
-
-    query = request.args.get("query")
-    if query == "":
-        query = None
-
-    dietary_restriction_radio = request.args.get("dietary_restriction_radio")
     
-    search_restaurant_information_sql = base_restaurant_information_sql
-    
-    search_WHERE_present = False
-    if dietary_restriction_radio != None:
-        RestaurantDietaryRestriction_JOIN_sql = """
-                                                JOIN RestaurantDietaryRestriction
-                                                    ON Restaurant.id = RestaurantDietaryRestriction.restaurant_id
-                                                """
-        column_name_list_radio = ["dietary_restriction_id"]
-        WHERE_conditions_sql_radio = sql_generator_WHERE_conditions("WHERE", "OR", "LIKE", column_name_list_radio, dietary_restriction_radio)
-        
-        search_restaurant_information_sql += RestaurantDietaryRestriction_JOIN_sql + WHERE_conditions_sql_radio
-        
-        search_WHERE_present = True
-        
-    if query != None: 
-        column_name_list_query = ["name", "address", "type", "cost", "description", "tags"]        
-        if search_WHERE_present:
-            WHERE_conditions_sql_query = sql_generator_WHERE_conditions("AND", "OR", "LIKE", column_name_list_query, query)
-        else:
-            WHERE_conditions_sql_query = sql_generator_WHERE_conditions("WHERE", "OR", "LIKE", column_name_list_query, query)
-            
-            search_WHERE_present = True
-        
-        search_restaurant_information_sql += WHERE_conditions_sql_query
-    
-    if search_WHERE_present:
-        cursor.execute(search_restaurant_information_sql)
-        search_information = cursor.fetchall()
-    else:
-        search_information = None
+    search_information = search_result_return(cursor, base_restaurant_information_sql)
 
     # Favorite Recommendation
-    cursor.execute(base_restaurant_information_sql)
+    cursor.execute(base_restaurant_information_sql + ";")
     restaurant_information = cursor.fetchall()
 
     # Dietary Restriction

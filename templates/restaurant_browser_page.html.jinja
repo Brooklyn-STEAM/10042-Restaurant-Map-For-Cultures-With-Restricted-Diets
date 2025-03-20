@@ -14,7 +14,7 @@
         <h1>Browser</h1>
     </header>
     <main class="container row g-1 row g-md-4 mx-auto">
-        <section>
+        <section class="container row g-1 row g-md-4 mx-auto">
             <div>
                 {% with dietary_restriction_list = dietary_restriction_list %}
                     {% include "components/search_bar.html.jinja" %}
@@ -98,7 +98,7 @@
 
         <hr>
 
-        <section>
+        <section class="container row g-1 row g-md-4 mx-auto">
             <h2>Recommendations</h2>
 
             {% for restaurant in restaurant_information %}
