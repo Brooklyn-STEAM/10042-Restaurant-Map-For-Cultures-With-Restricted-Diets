@@ -45,6 +45,16 @@
                 <span class="input-group-text" id="price_min_filter_label">Max</span>
                 <input type="number" name="price_max_filter" value="{{ request.args.get('price_max_filter', '') }}">
             </div>
+            <div class="form-check">
+                {% if request.args.get('exact_price_toggle') != "" %}
+                    <input name = "exact_price_toggle" class="form-check-input" type="checkbox" value="1" id="flexCheckDefault" checked>
+                {% else %}
+                    <input name = "exact_price_toggle" class="form-check-input" type="checkbox" value="1" id="flexCheckDefault">
+                {% endif %}
+                <label class="form-check-label" for="flexCheckDefault">
+                    Exact Prices
+                </label>
+            </div>
         </div>
     </section>
 </form>
