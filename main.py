@@ -1,3 +1,91 @@
+# '%%' look for stuff between words
+def not_empty(value):
+    if value:
+        return True
+    else:
+        return False
+def empty_value_filter(values):
+    local_values = list(values)
+    
+    filter_results = filter(not_empty, local_values)
+        
+    return filter_results
+
+def search_result_return(cursor, base_restaurant_information_sql):
+    query = request.args.get("query")
+    dietary_restriction_radio = request.args.get("dietary_restriction_radio")
+
+    price_min_filter = request.args.get('price_min_filter')
+    price_max_filter = request.args.get('price_max_filter')
+    exact_price_toggle = request.args.get("exact_price_toggle")
+
+    search_present = False
+
+    if dietary_restriction_radio:
+        search_present = True
+        RestaurantDietaryRestriction_JOIN_sql = """
+                                                JOIN RestaurantDietaryRestriction
+                                                    ON Restaurant.id = RestaurantDietaryRestriction.restaurant_id
+                                                """
+        WHERE_conditions_sql_radio = f"(RestaurantDietaryRestriction.dietary_restriction_id = {dietary_restriction_radio})"
+    else:
+        RestaurantDietaryRestriction_JOIN_sql = ""
+        WHERE_conditions_sql_radio = ""
+
+    if query.replace(" ", "") != None: 
+        search_present = True
+        WHERE_conditions_sql_query = f"""(
+                                            (`name` LIKE '%{query}%') 
+                                            OR 
+                                            (`address` LIKE '%{query}%')
+                                            OR 
+                                            (`type` LIKE '%{query}%') 
+                                            OR 
+                                            (`cost` LIKE '%{query}%' )
+                                            OR 
+                                            (`description` LIKE '%{query}%') 
+                                            OR 
+                                            (`tags` LIKE '%{query}%')
+                                        )"""
+    else:
+        WHERE_conditions_sql_query = ""
+
+    if price_min_filter:
+        search_present = True
+        if exact_price_toggle:
+            WHERE_conditions_sql_price_min_filter = f"(min_cost = {price_min_filter})"
+        else:
+            WHERE_conditions_sql_price_min_filter = f"(min_cost >= {price_min_filter})"
+    else:
+        WHERE_conditions_sql_price_min_filter = ""
+
+    if price_max_filter:
+        search_present = True
+        if exact_price_toggle:
+            WHERE_conditions_sql_price_max_filter = f"(max_cost = {price_max_filter})"
+        else:
+            WHERE_conditions_sql_price_max_filter = f"(max_cost <= {price_max_filter})"
+    else:
+        WHERE_conditions_sql_price_max_filter = ""
+    
+
+    if search_present:
+        search_WHERE_conditions_sql_list = [WHERE_conditions_sql_radio, 
+                                            WHERE_conditions_sql_query, 
+                                            WHERE_conditions_sql_price_min_filter, 
+                                            WHERE_conditions_sql_price_max_filter]
+        filtered_search_WHERE_conditions_sql_list = empty_value_filter(search_WHERE_conditions_sql_list)
+        search_WHERE_conditions_sql =  " WHERE " + " AND ".join(filtered_search_WHERE_conditions_sql_list)
+        
+        search_restaurant_information_sql = base_restaurant_information_sql + RestaurantDietaryRestriction_JOIN_sql + search_WHERE_conditions_sql + ";"
+        
+        cursor.execute(search_restaurant_information_sql)
+        search_restaurant_results = cursor.fetchall()
+        print(search_restaurant_information_sql)
+        return search_restaurant_results
+    else:
+        return None
+
 from flask import Flask, render_template, request, redirect, flash, abort
 import pymysql
 from dynaconf import Dynaconf
@@ -16,7 +104,7 @@ login_manager.init_app(app)
 login_manager.login_view = ('/sign_in')
 
 def connect_db():
-    conn =pymysql.connect(
+    conn = pymysql.connect(
         host="db.steamcenter.tech",
         database="dish_map",
         user='bwang',
@@ -26,6 +114,7 @@ def connect_db():
     )
 
     return conn
+
 
 class User:
     is_authenticated = True
@@ -40,10 +129,8 @@ class User:
         self.last_name = last_name
         self.preferred_name = preferred_name 
 
-
     def get_id(self):
         return str(self.id)
-
 @login_manager.user_loader
 def load_user(user_id):
     conn = connect_db()
@@ -58,6 +145,7 @@ def load_user(user_id):
 
     if result is not None:
         return User(result["id"], result["email"], result["first_name"], result["middle_name"], result["last_name"], result["preferred_name"])
+
 
 #coordinator connect two fuction
 @app.route("/")
@@ -108,7 +196,6 @@ def sign_up_page():
             flash("Sorry, Your Password need to be stronger: it should be at least 10 characters long")
 
     return render_template("sign_up_page.html.jinja")
-
 
 @app.route("/sign_in", methods=["POST", "GET"])
 def sign_in_page():
@@ -171,79 +258,38 @@ def restaurant_browser():
     cursor = conn.cursor()
     current_user_id = flask_login.current_user.id
     
-    query = request.args.get("query")
-    if query == "":
-        query = None
+    base_restaurant_information_sql = f"""
+                SELECT Restaurant.id as restaurant_id,
+                        name, 
+                        type, cost, 
+                        min_cost, 
+                        max_cost, 
+                        image, 
+                        FavoriteRestaurants.id as favorite_restaurants_id,
+                        FavoriteRestaurants.user_id 
+                FROM Restaurant 
+                LEFT JOIN FavoriteRestaurants 
+                    ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                        AND FavoriteRestaurants.user_id = {current_user_id}
+                """
     
-    if query == None:
-        cursor.execute(f"""
-            SELECT Restaurant.id as restaurant_id, 
-                    name, 
-                    type, 
-                    cost, 
-                    image, 
-                    FavoriteRestaurants.id as favorite_restaurants_id,
-                    FavoriteRestaurants.user_id 
-            FROM Restaurant 
-            LEFT JOIN FavoriteRestaurants 
-                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                    AND FavoriteRestaurants.user_id = {current_user_id};
-        """)
-        restaurant_information = cursor.fetchall()
-        search_information = None
-    else:
-        cursor.execute(f"""
-            SELECT Restaurant.id as restaurant_id, 
-                    name, 
-                    type, 
-                    cost, 
-                    image, 
-                    FavoriteRestaurants.id as favorite_restaurants_id,
-                    FavoriteRestaurants.user_id 
-            FROM Restaurant 
-            LEFT JOIN FavoriteRestaurants 
-                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                    AND FavoriteRestaurants.user_id = {current_user_id};
-        """)
-        restaurant_information = cursor.fetchall()
+    search_information = search_result_return(cursor, base_restaurant_information_sql)
 
-        cursor.execute(f"""
-            SELECT Restaurant.id as restaurant_id, 
-                    name, 
-                    address,
-                    type, 
-                    cost, 
-                    description,
-                    image, 
-                    tags,
-                    FavoriteRestaurants.id as favorite_restaurants_id,
-                    FavoriteRestaurants.user_id 
-            FROM Restaurant 
-            LEFT JOIN FavoriteRestaurants 
-                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                    AND FavoriteRestaurants.user_id = {current_user_id}
-            WHERE 
-                `name` LIKE '%{query}%' 
-                OR 
-                `address` LIKE '%{query}%' 
-                OR 
-                `type` LIKE '%{query}%'
-                OR
-                `cost` LIKE '%{query}%' 
-                OR 
-                `description` LIKE '%{query}%' 
-                OR 
-                `tags` LIKE '%{query}%';
-        """)
-        #cost search isn't working
-        search_information = cursor.fetchall()
-    
+    # Favorite + Recommendation
+    cursor.execute(base_restaurant_information_sql + ";")
+    restaurant_information = cursor.fetchall()
+
+    # Dietary Restriction
+    cursor.execute("SELECT * FROM DietaryRestriction")
+    dietary_restriction_list = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
     return render_template("restaurant_browser_page.html.jinja", 
                            restaurant_information = restaurant_information,
-                           search_information = search_information)
+                           search_information = search_information, 
+                           dietary_restriction_list = dietary_restriction_list)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
 @flask_login.login_required
@@ -330,7 +376,11 @@ def individual_restaurant(restaurant_id):
         elif review["rating"] == 5:
             total_five_stars += 1
 
-    average_stars = total_stars/len(review_information)
+    if len(review_information) > 0:
+        average_stars = total_stars/len(review_information)
+    else:
+        average_stars = None
+
     total_of_each_star_count_list = [total_zero_stars, 
                                 total_one_stars, 
                                 total_two_stars, 
