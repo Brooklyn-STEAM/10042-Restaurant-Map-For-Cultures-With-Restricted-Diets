@@ -449,14 +449,13 @@ def restaurant_review_update(restaurant_id):
 
 
 @app.route("/map")
-@flask_login.login_required
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
 
     cursor.close()
     conn.close()
-
+    return render_template("map.html.jinja")
 
 # @app.route("/cart")
 # @flask_login.login_required
