@@ -398,14 +398,27 @@ def restaurant_review_update(restaurant_id):
     return redirect(f"/individual_restaurant/{restaurant_id}")
 
 
-@app.route("/map")
+@app.route("/map" , methods=["POST", "GET"])
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
 
+    query = request.args.get("query")
+
+    if query == "":
+        query = None
+    
+    if query == None:
+        cursor.execute(f"""
+            SELECT *
+            FROM Restaurant 
+        """)
+    
+    results = cursor.fetchall()
+
     cursor.close()
     conn.close()
-    return render_template("map.html.jinja")
+    return render_template("map.html.jinja", restaurants = results)
 
 # @app.route("/cart")
 # @flask_login.login_required
@@ -419,3 +432,5 @@ def map_page():
     #     result = cursor.fetchone()
 #     cursor.close()
 #     conn.close()
+
+
