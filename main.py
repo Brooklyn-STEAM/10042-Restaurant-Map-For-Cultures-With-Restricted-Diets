@@ -5,50 +5,34 @@ def not_empty(value):
     else:
         return False
 def empty_value_filter(values):
-    values = list(values)
+    local_values = list(values)
     
-    filter_results = filter(not_empty, values)
+    filter_results = filter(not_empty, local_values)
         
     return filter_results
 
 def search_result_return(cursor, base_restaurant_information_sql):
     query = request.args.get("query")
-    if query == "":
-        query = None
-
     dietary_restriction_radio = request.args.get("dietary_restriction_radio")
-    if dietary_restriction_radio == "":
-        dietary_restriction_radio = None
 
     price_min_filter = request.args.get('price_min_filter')
-    if price_min_filter == "":
-        price_min_filter = None
-    
     price_max_filter = request.args.get('price_max_filter')
-    if price_max_filter == "":
-        price_max_filter = None
-    
     exact_price_toggle = request.args.get("exact_price_toggle")
-    if exact_price_toggle == "":
-        exact_price_toggle = None
-    else:
-        exact_price_toggle = True
 
     search_present = False
-    if dietary_restriction_radio != None:
+
+    if dietary_restriction_radio:
         search_present = True
         RestaurantDietaryRestriction_JOIN_sql = """
                                                 JOIN RestaurantDietaryRestriction
                                                     ON Restaurant.id = RestaurantDietaryRestriction.restaurant_id
-                                                """        
-        WHERE_conditions_sql_radio = f"""(
-                                            RestaurantDietaryRestriction.dietary_restriction_id = {dietary_restriction_radio}
-                                        )"""
+                                                """
+        WHERE_conditions_sql_radio = f"(RestaurantDietaryRestriction.dietary_restriction_id = {dietary_restriction_radio})"
     else:
         RestaurantDietaryRestriction_JOIN_sql = ""
         WHERE_conditions_sql_radio = ""
 
-    if query != None: 
+    if query.replace(" ", "") != None: 
         search_present = True
         WHERE_conditions_sql_query = f"""(
                                             (`name` LIKE '%{query}%') 
@@ -66,48 +50,38 @@ def search_result_return(cursor, base_restaurant_information_sql):
     else:
         WHERE_conditions_sql_query = ""
 
-    if price_min_filter != None:
+    if price_min_filter:
         search_present = True
         if exact_price_toggle:
-            WHERE_conditions_sql_price_min_filter = f"""(
-                                                        min_cost = {price_min_filter}
-                                                    )"""
+            WHERE_conditions_sql_price_min_filter = f"(min_cost = {price_min_filter})"
         else:
-            WHERE_conditions_sql_price_min_filter = f"""(
-                                                        min_cost >= {price_min_filter}
-                                                    )"""
+            WHERE_conditions_sql_price_min_filter = f"(min_cost >= {price_min_filter})"
     else:
         WHERE_conditions_sql_price_min_filter = ""
 
-    if price_max_filter != None:
+    if price_max_filter:
         search_present = True
         if exact_price_toggle:
-            WHERE_conditions_sql_price_max_filter = f"""(
-                                                        max_cost = {price_max_filter}
-                                                    )"""
+            WHERE_conditions_sql_price_max_filter = f"(max_cost = {price_max_filter})"
         else:
-            WHERE_conditions_sql_price_max_filter = f"""(
-                                                        max_cost <= {price_max_filter}
-                                                    )"""
+            WHERE_conditions_sql_price_max_filter = f"(max_cost <= {price_max_filter})"
     else:
         WHERE_conditions_sql_price_max_filter = ""
     
 
     if search_present:
-
         search_WHERE_conditions_sql_list = [WHERE_conditions_sql_radio, 
                                             WHERE_conditions_sql_query, 
                                             WHERE_conditions_sql_price_min_filter, 
                                             WHERE_conditions_sql_price_max_filter]
-        search_WHERE_conditions_sql =  " WHERE " + " AND ".join(empty_value_filter(search_WHERE_conditions_sql_list))
-
-        RestaurantDietaryRestriction_JOIN_sql = " " + RestaurantDietaryRestriction_JOIN_sql
+        filtered_search_WHERE_conditions_sql_list = empty_value_filter(search_WHERE_conditions_sql_list)
+        search_WHERE_conditions_sql =  " WHERE " + " AND ".join(filtered_search_WHERE_conditions_sql_list)
         
         search_restaurant_information_sql = base_restaurant_information_sql + RestaurantDietaryRestriction_JOIN_sql + search_WHERE_conditions_sql + ";"
         
         cursor.execute(search_restaurant_information_sql)
         search_restaurant_results = cursor.fetchall()
-        
+        print(search_restaurant_information_sql)
         return search_restaurant_results
     else:
         return None
@@ -301,7 +275,7 @@ def restaurant_browser():
     
     search_information = search_result_return(cursor, base_restaurant_information_sql)
 
-    # Favorite Recommendation
+    # Favorite + Recommendation
     cursor.execute(base_restaurant_information_sql + ";")
     restaurant_information = cursor.fetchall()
 
