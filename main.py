@@ -32,7 +32,7 @@ def search_result_return(cursor, base_restaurant_information_sql):
         RestaurantDietaryRestriction_JOIN_sql = ""
         WHERE_conditions_sql_radio = ""
 
-    if query.replace(" ", "") != None: 
+    if query: 
         search_present = True
         WHERE_conditions_sql_query = f"""(
                                             (`name` LIKE '%{query}%') 
@@ -40,8 +40,6 @@ def search_result_return(cursor, base_restaurant_information_sql):
                                             (`address` LIKE '%{query}%')
                                             OR 
                                             (`type` LIKE '%{query}%') 
-                                            OR 
-                                            (`cost` LIKE '%{query}%' )
                                             OR 
                                             (`description` LIKE '%{query}%') 
                                             OR 
@@ -261,7 +259,7 @@ def restaurant_browser():
     base_restaurant_information_sql = f"""
                 SELECT Restaurant.id as restaurant_id,
                         name, 
-                        type, cost, 
+                        type,  
                         min_cost, 
                         max_cost, 
                         image, 
