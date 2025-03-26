@@ -16,7 +16,7 @@
     <main class="container row g-1 row g-md-4 mx-auto">
         <section class="container row g-1 row g-md-4 mx-auto">
             <div>
-                {% with dietary_restriction_list = dietary_restriction_list %}
+                {% with dietary_restriction_list = dietary_restriction_list, current_route = "/restaurant_browser" %}
                     {% include "components/search_bar.html.jinja" %}
                 {% endwith %}
             </div>

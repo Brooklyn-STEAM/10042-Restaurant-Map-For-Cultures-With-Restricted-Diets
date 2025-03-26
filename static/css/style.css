@@ -6,3 +6,34 @@
 .filter-accordion-body{
     border: 1px solid black;
 }
+/* https://www.w3schools.com/cssref/pr_grid.php */
+.custom-grid-container {
+    height: 100%;
+    width: 100%;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    display: grid;
+    grid: auto auto auto auto;
+  }
+.custom-grid-container > .custom-grid-cell{
+    background-color: aqua;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0px;
+}
+
+#map-searchbar{
+    position: absolute;
+    z-index: 1;
+    right: 0px;
+    top: 0px;
+    width: 35%;
+}
+#map-container{
+    flex-grow: 1; 
+    position:relative;
+    overflow: hidden;
+}
