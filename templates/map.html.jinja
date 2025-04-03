@@ -24,12 +24,27 @@
 
 
      <main id="map-container">
-
           <div id="map-searchbar">
-               {% with dietary_restriction_list = dietary_restriction_list, current_route = "/map" %}
-                    {% include "components/search_bar.html.jinja" %}
-               {% endwith %}
-
+               <div>
+                    {% with dietary_restriction_list = dietary_restriction_list, current_route = "/map" %}
+                         {% include "components/search_bar.html.jinja" %}
+                    {% endwith %}
+               </div>
+               <div class="accordion" id="accordionExample">
+                    <h2 class="accordion-header">
+                         <button id="miniBrowserCollapser_buttonId" type="button" data-bs-toggle="collapse" data-bs-target="#miniBrowser_collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                              <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
+                                   <path d="M14 5l-6.5 7L1 5" stroke="currentColor" stroke-linecap="square"></path>
+                              </svg>
+                         </button>
+                    </h2>
+                    <div id="miniBrowser_collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                         <div class="accordion-body">
+                              {% include "components/mini_browser.html.jinja" %}
+                         </div>
+                         
+                    </div>
+               </div>
           </div>
 
           <div id="map"></div>

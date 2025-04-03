@@ -1,0 +1,8 @@
+{# require var restaurants and var mode #}
+<section class="categoryOfRestaurantCards">
+    {% for restaurant in restaurants %}
+        {% if (restaurant["user_id"] == current_user.id) or mode != "only favorites" %}
+            {% include "components/restaurant_card.html.jinja"%}
+        {% endif %}
+    {% endfor %}
+</section>
