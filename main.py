@@ -284,10 +284,17 @@ def restaurant_browser():
     cursor.close()
     conn.close()
 
+    user_favorite_present = ""
+    for restaurant in restaurant_information:
+        if restaurant["user_id"] == current_user_id:
+            user_favorite_present = "yes"
+            break        
+
     return render_template("restaurant_browser_page.html.jinja", 
                            restaurant_information = restaurant_information,
                            search_information = search_information, 
-                           dietary_restriction_list = dietary_restriction_list)
+                           dietary_restriction_list = dietary_restriction_list,
+                           user_favorite_present = user_favorite_present)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
 @flask_login.login_required
