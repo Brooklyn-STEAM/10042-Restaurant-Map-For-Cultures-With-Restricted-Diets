@@ -7,25 +7,6 @@
     border: 1px solid black;
 }
 
-html, body {
-    width: 100vw;
-    height: 100vh;
-    margin: 0px;
-}
-
-#map-searchbar{
-    position: absolute;
-    z-index: 1;
-    right: 0px;
-    top: 0px;
-    width: 35%;
-}
-#map-container{
-    flex-grow: 1; 
-    position:relative;
-    overflow: hidden;
-}
-
 #miniBrowserCollapser_buttonId{
     background-color: transparent;
     border: none;
@@ -63,11 +44,11 @@ html, body {
             aspect-ratio: 1 / 2;
             
             
-            .sections-card-imgsBox{
+            & > .sections-card-imgsBox{
                 height: 50%;
                 aspect-ratio: 1 / 1;
 
-                .figure-card-imgFrame{
+                & > .figure-card-imgFrame{
                     overflow: hidden;
                     & > img {
                         max-width: 100%;
@@ -96,3 +77,39 @@ html, body {
     };
 };
 
+.main-map-container{
+    flex-grow: 1; 
+    position:relative;
+    overflow: hidden;
+    
+    & > .aside-miniBrowser-container{
+        position: absolute;
+        z-index: 1;
+        right: 0px;
+        top: 0px;
+        width: 100px;
+        overflow-y: scroll;
+        & > .header-miniBrowser-searchbar{
+            height: fit-content;
+        };
+        & > .section-miniBrowser-body{
+
+
+            & > .section-miniBrowser-searchResults, & > .section-miniBrowser-favorites, & > .section-miniBrowser-recommendations{
+                
+                & > .categoryOfRestaurantCards{
+                    height: 50vmin;
+                };
+            };
+
+        };
+    };
+
+};
+
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    margin: 0px;
+}

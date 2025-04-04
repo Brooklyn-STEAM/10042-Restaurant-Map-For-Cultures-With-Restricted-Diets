@@ -489,10 +489,17 @@ def map_page():
     cursor.close()
     conn.close()
 
+    user_favorite_present = ""
+    for restaurant in restaurant_information:
+        if restaurant["user_id"] == current_user_id:
+            user_favorite_present = "yes"
+            break        
+
     return render_template("map.html.jinja", 
                            restaurant_information = restaurant_information,
                            search_information = search_information, 
-                           dietary_restriction_list = dietary_restriction_list)
+                           dietary_restriction_list = dietary_restriction_list,
+                           user_favorite_present = user_favorite_present)
 
 # @app.route("/cart")
 # @flask_login.login_required
