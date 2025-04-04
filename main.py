@@ -284,10 +284,17 @@ def restaurant_browser():
     cursor.close()
     conn.close()
 
+    user_favorite_present = ""
+    for restaurant in restaurant_information:
+        if restaurant["user_id"] == current_user_id:
+            user_favorite_present = "yes"
+            break        
+
     return render_template("restaurant_browser_page.html.jinja", 
                            restaurant_information = restaurant_information,
                            search_information = search_information, 
-                           dietary_restriction_list = dietary_restriction_list)
+                           dietary_restriction_list = dietary_restriction_list,
+                           user_favorite_present = user_favorite_present)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
 @flask_login.login_required
@@ -450,23 +457,49 @@ def restaurant_review_update(restaurant_id):
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
-
-    query = request.args.get("query")
-
-    if query == "":
-        query = None
+    current_user_id = flask_login.current_user.id
     
-    if query == None:
-        cursor.execute(f"""
-            SELECT *
-            FROM Restaurant 
-        """)
+    base_restaurant_information_sql = f"""
+                SELECT Restaurant.id as restaurant_id,
+                        name, 
+                        type, 
+                        min_cost, 
+                        max_cost, 
+                        image, 
+                        lng, 
+                        lat, 
+                        FavoriteRestaurants.id as favorite_restaurants_id,
+                        FavoriteRestaurants.user_id 
+                FROM Restaurant 
+                LEFT JOIN FavoriteRestaurants 
+                    ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                        AND FavoriteRestaurants.user_id = {current_user_id}
+                """
     
-    results = cursor.fetchall()
+    search_information = search_result_return(cursor, base_restaurant_information_sql)
+
+    # Favorite + Recommendation
+    cursor.execute(base_restaurant_information_sql + ";")
+    restaurant_information = cursor.fetchall()
+
+    # Dietary Restriction
+    cursor.execute("SELECT * FROM DietaryRestriction")
+    dietary_restriction_list = cursor.fetchall()
 
     cursor.close()
     conn.close()
-    return render_template("map.html.jinja", restaurants = results)
+
+    user_favorite_present = ""
+    for restaurant in restaurant_information:
+        if restaurant["user_id"] == current_user_id:
+            user_favorite_present = "yes"
+            break        
+
+    return render_template("map.html.jinja", 
+                           restaurant_information = restaurant_information,
+                           search_information = search_information, 
+                           dietary_restriction_list = dietary_restriction_list,
+                           user_favorite_present = user_favorite_present)
 
 # @app.route("/cart")
 # @flask_login.login_required

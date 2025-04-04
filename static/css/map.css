@@ -82,7 +82,8 @@
     font-style: italic;
   }
 
-  
 
-
-  #map { height: 1000px; }
+#map { 
+  position: relative;
+  z-index: 0;
+  height: 1000px; }

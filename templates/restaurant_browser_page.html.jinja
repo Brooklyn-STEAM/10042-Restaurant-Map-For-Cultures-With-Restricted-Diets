@@ -14,67 +14,74 @@
         <h1>Browser</h1>
     </header>
     <main class="container row g-1 row g-md-4 mx-auto">
+        <div>
+            {% with dietary_restriction_list = dietary_restriction_list, current_route = "/restaurant_browser" %}
+                {% include "components/search_bar.html.jinja" %}
+            {% endwith %}
+        </div>
         <section class="container row g-1 row g-md-4 mx-auto">
-            <div>
-                {% with dietary_restriction_list = dietary_restriction_list %}
-                    {% include "components/search_bar.html.jinja" %}
-                {% endwith %}
-            </div>
-            <div>
-                {% if search_information %}
-                    <div class="container row g-1 row g-md-4 mx-auto">
-                        <h2>Search Results</h2>
+            {% if search_information %}
+                <div>
+                    <h2>Search Results</h2>
+                    <section class="categoryOfRestaurantCards">
                         {% for restaurant in search_information %}
                             {% with restaurant = restaurant %}
-                                {% include "components/restaurants_card.html.jinja" %}
+                                {% include "components/restaurant_card.html.jinja"%}
                             {% endwith %}
                         {% endfor %}
+                    </section>
+                </div>
+            {% elif 
+                request.args.get('query') 
+                or 
+                request.args.get('dietary_restriction_radio') 
+                or
+                request.args.get('price_min_filter') 
+                or 
+                request.args.get('price_max_filter') 
+            %}
+                <div class="container row g-1 row g-md-4 mx-auto">
+                    <h2>Search Results</h2>
+                    <div>
+                        <p>No Match</p>
                     </div>
-                {% elif 
-                    request.args.get('query') 
-                    or 
-                    request.args.get('dietary_restriction_radio') 
-                    or
-                    request.args.get('price_min_filter') 
-                    or 
-                    request.args.get('price_max_filter') 
-                %}
-                    <div class="container row g-1 row g-md-4 mx-auto">
-                        <h2>Search Results</h2>
-                        <div>
-                            <p>No Match</p>
-                        </div>
-                    </div>
+                </div>
 
-                {% else %}
+            {% else %}
 
-                {% endif %}
-            </div>
+            {% endif %}
         </section>
         
         <hr>
 
         <section class="container row g-1 row g-md-4 mx-auto">
-            <h2>Favorites</h2>
-            {% for restaurant in restaurant_information %}
-                {% if restaurant["user_id"] == current_user.id %}
-                    {% with restaurant = restaurant %}
-                        {% include "components/restaurants_card.html.jinja" %}
-                    {% endwith %}
-                {% endif %}
-            {% endfor %}
+            <h2>Favorites</h2>       
+            {% if user_favorite_present %}
+                <section class="categoryOfRestaurantCards">
+                    {% for restaurant in restaurant_information %}
+                        {% if (restaurant["user_id"] == current_user.id) %}
+                            {% with restaurant = restaurant %}
+                                {% include "components/restaurant_card.html.jinja"%}
+                            {% endwith %}
+                        {% endif %}
+                    {% endfor %}
+                </section>
+            {% else %}
+                <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
+            {% endif %}
         </section>
 
         <hr>
 
         <section class="container row g-1 row g-md-4 mx-auto">
             <h2>Recommendations</h2>
-
-            {% for restaurant in restaurant_information %}
-                {% with restaurant = restaurant %}
-                    {% include "components/restaurants_card.html.jinja" %}
-                {% endwith %}
-            {% endfor %}
+            <section class="categoryOfRestaurantCards">
+                {% for restaurant in restaurant_information %}
+                    {% with restaurant = restaurant %}
+                        {% include "components/restaurant_card.html.jinja"%}
+                    {% endwith %}
+                {% endfor %}
+            </section>
         </section>
 
     </main>
