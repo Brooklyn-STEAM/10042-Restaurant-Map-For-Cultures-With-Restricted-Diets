@@ -1,40 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
-     <meta charset="utf-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1">
-     <title>Bootstrap demo</title>
-     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-     <link rel="stylesheet" href="/static/style.css">
-</head>
-
-<body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  </head>
+  <body>
      {% include "components/navbar.html.jinja" %}
-     
-     <div id="map"></div>
-     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-     <script>
-
-          var map = L.map('map').setView([51.505, -0.09], 13); 
-
-          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-               attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          }).addTo(map);
-
-          {% for restaurant in restaurants %}
-          L.marker([{{ restaurant["lat"] }},{{restaurant["lng"]}}]).addTo(map)
-               .bindPopup(`{{ restaurant["name"]}} {{ restaurant["description"]}} <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">`)
-               .openPopup();
-          {% endfor %}
-          
-
-
-     </script>
+ <div><iframe src="https://maps.co/embed/67d18b8b98414689283263fvtf9545e" width="800" height="600" frameborder="0" allowfullscreen></iframe><div><a href="https://maps.co">Powered by Map Maker</a></div></div>
 
 
 
@@ -44,9 +18,12 @@
 
 
 
-     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-          integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-          crossorigin="anonymous"></script>
-</body>
 
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  </body>
 </html>
+

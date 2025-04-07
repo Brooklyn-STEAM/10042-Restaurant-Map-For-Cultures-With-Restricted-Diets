@@ -32,7 +32,7 @@ def search_result_return(cursor, base_restaurant_information_sql):
         RestaurantDietaryRestriction_JOIN_sql = ""
         WHERE_conditions_sql_radio = ""
 
-    if query.replace(" ", "") != None: 
+    if query: 
         search_present = True
         WHERE_conditions_sql_query = f"""(
                                             (`name` LIKE '%{query}%') 
@@ -40,8 +40,6 @@ def search_result_return(cursor, base_restaurant_information_sql):
                                             (`address` LIKE '%{query}%')
                                             OR 
                                             (`type` LIKE '%{query}%') 
-                                            OR 
-                                            (`cost` LIKE '%{query}%' )
                                             OR 
                                             (`description` LIKE '%{query}%') 
                                             OR 
@@ -261,7 +259,7 @@ def restaurant_browser():
     base_restaurant_information_sql = f"""
                 SELECT Restaurant.id as restaurant_id,
                         name, 
-                        type, cost, 
+                        type,  
                         min_cost, 
                         max_cost, 
                         image, 
@@ -286,10 +284,17 @@ def restaurant_browser():
     cursor.close()
     conn.close()
 
+    user_favorite_present = ""
+    for restaurant in restaurant_information:
+        if restaurant["user_id"] == current_user_id:
+            user_favorite_present = "yes"
+            break        
+
     return render_template("restaurant_browser_page.html.jinja", 
                            restaurant_information = restaurant_information,
                            search_information = search_information, 
-                           dietary_restriction_list = dietary_restriction_list)
+                           dietary_restriction_list = dietary_restriction_list,
+                           user_favorite_present = user_favorite_present)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
 @flask_login.login_required
@@ -453,22 +458,9 @@ def map_page():
     conn = connect_db()
     cursor = conn.cursor()
 
-    query = request.args.get("query")
-
-    if query == "":
-        query = None
-    
-    if query == None:
-        cursor.execute(f"""
-            SELECT *
-            FROM Restaurant 
-        """)
-    
-    results = cursor.fetchall()
-
     cursor.close()
     conn.close()
-    return render_template("map.html.jinja", restaurants = results)
+    return render_template("map.html.jinja")
 
 # @app.route("/cart")
 # @flask_login.login_required
