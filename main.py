@@ -513,5 +513,3 @@ def map_page():
     #     result = cursor.fetchone()
 #     cursor.close()
 #     conn.close()
-
-
