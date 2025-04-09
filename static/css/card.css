@@ -1,6 +1,6 @@
 .section-card-group{
     width: 100%;
-    height: 75vmin;
+    height: 90%;
 
     overflow-y: hidden;
     overflow-x: scroll;
@@ -12,6 +12,7 @@
         display: inline-block;
         height: 100%; 
         aspect-ratio: 1 / 2;
+
         background-color: rgb(161, 206, 235);
         
         
@@ -72,10 +73,26 @@
 
 .main-browser{    
     padding: 0px 3vw 0px;
-    
-}
-.header-browser-searchbar, .section-browser-body{
 
+
+    & > .section-browser-body{
+        height: calc(3 * 60vmin);
+        display: flex;
+        flex-direction: column;
+
+
+        & > .section-browser-searchs:has(>*), .section-browser-favorites:has(>*), .section-browser-recommendations:has(>*){
+            flex-grow: 1;
+            
+            overflow: hidden;
+            width: calc(100% - (2 * 3vw));
+            height: 75vmin;
+    
+        }
+    }
 }
-.section-browser-searchs, .section-browser-favorites, .section-browser-recommendations{
+
+
+.header-browser-searchbar{
+
 }

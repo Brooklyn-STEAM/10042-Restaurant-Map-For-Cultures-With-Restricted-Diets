@@ -14,9 +14,10 @@
 
           <link rel="stylesheet" href="/static/css/map.css">
           <link rel="stylesheet" href="/static/css/style.css">
+          <link rel="stylesheet" href="/static/css/card.css">
      </section>
 </head>
-<body style="display: flex; flex-direction: column;">
+<body class="body-map-page">
 
      <header>
           {% include "components/navbar.html.jinja" %}
@@ -25,29 +26,29 @@
 
      <main class="main-map-container">
 
-          <aside class="aside-miniBrowser-container">
-               <header class="header-miniBrowser-searchbar">
+          <aside class="aside-browser">
+               <header class="header-browser-searchbar">
                     {% with dietary_restriction_list = dietary_restriction_list, current_route = "/map" %}
-                         {% include "components/search_bar.html.jinja" %}
+                              {% include "components/search_bar.html.jinja" %}
                     {% endwith %}
                </header>
-               
+
                <hr>
 
-               <section class="section-miniBrowser-body">
-                    <section class="section-miniBrowser-searchResults">
-                         {% if search_information %}
+               <section class="section-browser-body">
+                    <section class="section-browser-searchs">
+                              {% if search_information %}
                               <h2>Search Results</h2>
-                              <section class="categoryOfRestaurantCards">
+                              <section class="section-card-group">
                                    {% for restaurant in search_information %}
                                         {% with restaurant = restaurant %}
-                                             {% include "components/restaurant_card.html.jinja"%}
+                                                  {% include "components/restaurant_card.html.jinja"%}
                                         {% endwith %}
                                    {% endfor %}
                               </section>
                               
                               <hr>
-                         {% elif 
+                              {% elif 
                               request.args.get('query') 
                               or 
                               request.args.get('dietary_restriction_radio') 
@@ -55,43 +56,46 @@
                               request.args.get('price_min_filter') 
                               or 
                               request.args.get('price_max_filter') 
-                         %}
+                              %}
                               <h2>Search Results</h2>
                               <p>No Match</p>
 
                               <hr>
-                         {% endif %}
+                              {% endif %}
                     </section>
-
-                    <section class="section-miniBrowser-favorites">
-                         <h2>Favorites</h2>       
-                         {% if user_favorite_present %}
-                              <section class="categoryOfRestaurantCards">
+                    
+                    <section class="section-browser-favorites">
+                              <h2>Favorites</h2>       
+                              {% if user_favorite_present %}
+                              <section class="section-card-group">
                                    {% for restaurant in restaurant_information %}
                                         {% if (restaurant["user_id"] == current_user.id) %}
-                                             {% with restaurant = restaurant %}
+                                                  {% with restaurant = restaurant %}
                                                   {% include "components/restaurant_card.html.jinja"%}
-                                             {% endwith %}
+                                                  {% endwith %}
                                         {% endif %}
                                    {% endfor %}
                               </section>
-                         {% else %}
+                              {% else %}
                               <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
-                         {% endif %}                    
+                              {% endif %}                    
                     </section>
 
-                    <section class="section-miniBrowser-recommendations">
-                         <h2>Recommendations</h2>
-                         <section class="categoryOfRestaurantCards">
+                    <hr>
+
+                    <section class="section-browser-recommendations">
+                              <h2>Recommendations</h2>
+                              <section class="section-card-group">
                               {% for restaurant in restaurant_information %}
                                    {% with restaurant = restaurant %}
-                                   {% include "components/restaurant_card.html.jinja"%}
+                                        {% include "components/restaurant_card.html.jinja"%}
                                    {% endwith %}
                               {% endfor %}
-                         </section>
+                              </section>
                     </section>
 
                </section>
+
           </aside>
 
           <div id="map"></div>
