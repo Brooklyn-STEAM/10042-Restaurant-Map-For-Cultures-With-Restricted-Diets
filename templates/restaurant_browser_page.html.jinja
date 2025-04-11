@@ -17,87 +17,14 @@
     </header>
     <main class="main-browser">
         <header class="header-browser-searchbar">
-            {% with dietary_restriction_list = dietary_restriction_list, current_route = "/restaurant_browser" %}
+            {% with current_route = "/restaurant_browser" %}
                     {% include "components/search_bar.html.jinja" %}
             {% endwith %}
         </header>
 
         <hr>
 
-        <section class="section-browser-body">
-            <section class="section-browser-searchs">
-                    {% if search_information %}
-                        <h2>Search Results</h2>
-                        <section class="section-card-group">
-                            {% for restaurant in search_information %}
-                                {% with restaurant = restaurant %}
-                                        {% include "components/restaurant_card.html.jinja"%}
-                                {% endwith %}
-                            {% endfor %}
-                        </section>
-                        
-                        <hr>
-                    {% elif 
-                        request.args.get('query') 
-                        or 
-                        request.args.get('dietary_restriction_radio') 
-                        or
-                        request.args.get('price_min_filter') 
-                        or 
-                        request.args.get('price_max_filter') 
-                    %}
-                        <h2>Search Results</h2>
-                        <section class="section-card-group">
-                            <p>No Match</p>
-                        </section>
-                    {% endif %}
-            </section>
-            
-            {% if 
-                request.args.get('query') 
-                or 
-                request.args.get('dietary_restriction_radio') 
-                or
-                request.args.get('price_min_filter') 
-                or 
-                request.args.get('price_max_filter') 
-             %}
-            <hr>
-            {% endif %}
-
-            <section class="section-browser-favorites">
-                    <h2>Favorites</h2>       
-                    {% if user_favorite_present %}
-                        <section class="section-card-group">
-                            {% for restaurant in restaurant_information %}
-                                {% if (restaurant["user_id"] == current_user.id) %}
-                                        {% with restaurant = restaurant %}
-                                            {% include "components/restaurant_card.html.jinja"%}
-                                        {% endwith %}
-                                {% endif %}
-                            {% endfor %}
-                        </section>
-                    {% else %}
-                        <section class="section-card-group">
-                            <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
-                        </section>
-                    {% endif %}                    
-            </section>
-
-            <hr>
-
-            <section class="section-browser-recommendations">
-                    <h2>Recommendations</h2>
-                    <section class="section-card-group">
-                        {% for restaurant in restaurant_information %}
-                            {% with restaurant = restaurant %}
-                                {% include "components/restaurant_card.html.jinja"%}
-                            {% endwith %}
-                        {% endfor %}
-                    </section>
-            </section>
-
-        </section>
+        {% include "components/browser_body.html.jinja" %}
 
     </main>
     <script src="../static/javascript/script.js"></script>

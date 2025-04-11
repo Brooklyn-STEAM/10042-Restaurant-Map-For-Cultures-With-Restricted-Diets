@@ -87,13 +87,7 @@
   flex-direction: column;
   max-height: 100vh;
 
-
-  & > header{
-    flex-basis: content;
-    flex-shrink: 0;
-    flex-grow: 0;
-  }
-
+  
   & > .main-map-container{
     flex-shrink: 1;
     flex-grow: 0;
@@ -117,71 +111,39 @@
 
   width: 40%;
   max-height: 100%;
-  height: 100%;
-
+  height: fit-content;
+  
   padding: 0px 2vw 0px;
 
-  display: flex;
-  flex-direction: column;
-
+  background-color: aliceblue;
   border: 2px solid black;
 
 
-  & > *{
-    min-height: 0px;
-
-  }
-  & > .header-browser-searchbar{
-    flex-basis: content;
-    flex-grow: 0;
-  }
-
-  & > .section-browser-body{
-    flex-shrink: 1;
-    display: flex;
-    flex-direction: column;
-
+  & .section-browser-body{
     overflow-y: scroll;
+    max-height: 100%;
 
 
-    & > .section-browser-searchs:has(>*), .section-browser-favorites:has(>*), .section-browser-recommendations:has(>*){
-        flex-grow: 1;
-        
-        width: calc(100% - (2 * 3vw));
-        height: 75vmin;
-
+    & > :last-child{
+      margin-bottom: 100px;
     }
+    & > .section-browser-searchs:has(>*), .section-browser-favorites:has(>*), .section-browser-recommendations:has(>*){
+      width: 100%;
+      height: 70vh;
+      display: flex;
+      flex-direction: column;
+    }
+
   }
 }
-/*
-.hello{
-  .main-map-container{
-    flex-grow: 1; 
-    position:relative;
-    overflow: hidden;
-    
-    & > .aside-miniBrowser-container{
-        position: absolute;
-        z-index: 1;
-        right: 0px;
-        top: 0px;
-        width: 100px;
-        overflow-y: scroll;
-        & > .header-miniBrowser-searchbar{
-            height: fit-content;
-        };
-        & > .section-miniBrowser-body{
-  
-  
-            & > .section-miniBrowser-searchResults, & > .section-miniBrowser-favorites, & > .section-miniBrowser-recommendations{
-                
-                & > .categoryOfRestaurantCards{
-                    height: 50vmin;
-                };
-            };
-  
-        };
-    };
-  
-  };
-} */
+#accordion-miniBrowser{
+
+}
+#accordion-miniBrowser-toogleBtn{
+  width: 100%;
+}
+#accordion-miniBrowser-collapse{
+  height: fit-content;
+  overflow-y: scroll;
+
+}

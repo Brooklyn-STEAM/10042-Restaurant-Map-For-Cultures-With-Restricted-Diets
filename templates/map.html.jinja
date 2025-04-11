@@ -28,73 +28,29 @@
 
           <aside class="aside-browser">
                <header class="header-browser-searchbar">
-                    {% with dietary_restriction_list = dietary_restriction_list, current_route = "/map" %}
-                              {% include "components/search_bar.html.jinja" %}
+                    {% with current_route = "/map" %}
+                         {% include "components/search_bar.html.jinja" %}
                     {% endwith %}
                </header>
 
                <hr>
-
-               <section class="section-browser-body">
-                    <section class="section-browser-searchs">
-                              {% if search_information %}
-                              <h2>Search Results</h2>
-                              <section class="section-card-group">
-                                   {% for restaurant in search_information %}
-                                        {% with restaurant = restaurant %}
-                                                  {% include "components/restaurant_card.html.jinja"%}
-                                        {% endwith %}
-                                   {% endfor %}
-                              </section>
-                              
-                              <hr>
-                              {% elif 
-                              request.args.get('query') 
-                              or 
-                              request.args.get('dietary_restriction_radio') 
-                              or
-                              request.args.get('price_min_filter') 
-                              or 
-                              request.args.get('price_max_filter') 
-                              %}
-                              <h2>Search Results</h2>
-                              <p>No Match</p>
-
-                              <hr>
-                              {% endif %}
-                    </section>
-                    
-                    <section class="section-browser-favorites">
-                              <h2>Favorites</h2>       
-                              {% if user_favorite_present %}
-                              <section class="section-card-group">
-                                   {% for restaurant in restaurant_information %}
-                                        {% if (restaurant["user_id"] == current_user.id) %}
-                                                  {% with restaurant = restaurant %}
-                                                  {% include "components/restaurant_card.html.jinja"%}
-                                                  {% endwith %}
-                                        {% endif %}
-                                   {% endfor %}
-                              </section>
-                              {% else %}
-                              <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
-                              {% endif %}                    
-                    </section>
-
-                    <hr>
-
-                    <section class="section-browser-recommendations">
-                              <h2>Recommendations</h2>
-                              <section class="section-card-group">
-                              {% for restaurant in restaurant_information %}
-                                   {% with restaurant = restaurant %}
-                                        {% include "components/restaurant_card.html.jinja"%}
-                                   {% endwith %}
-                              {% endfor %}
-                              </section>
-                    </section>
-
-               </section>
+               
+               <div id="accordion-miniBrowser" class="accordion" id="accordionExample">
+                    <div class="accordion-item">
+                         <h2 class="accordion-header">
+                              <button id="accordion-miniBrowser-toogleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-miniBrowser-collapse" aria-expanded="true" aria-controls="collapseOne">
+                                   <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
+                                        <path d="M14 5l-6.5 7L1 5" stroke="currentColor" stroke-linecap="square"></path>
+                                   </svg>                         
+                              </button>
+                         </h2>
+                         <div id="accordion-miniBrowser-collapse" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                              <div class="accordion-body">
+                                   {% include "components/browser_body.html.jinja" %}
+                              </div>
+                         </div>
+                    </div>
+               </div>
 
           </aside>
 
