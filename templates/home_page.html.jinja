@@ -13,55 +13,94 @@
     href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    #picture {
+      height: 500px;
+      width: 1600px;
+    }
+  </style>
 </head>
 
-<body>
+<body class="body">
   {% include "components/navbar.html.jinja" %}
 
-  <div class="p-4 p-md-5 mb-4 rounded text-body-emphasis bg-body-secondary">
-    <div class="col-lg-6 px-0">
-      <h1 class="display-4 fst-italic ibm-plex-serif-bold">Dish Map</h1>
-      <p class="lead my-3">discover dishes that connect with you</p>
-      <p class="lead mb-0"><a href="#" class="text-body-emphasis fw-bold">Continue reading...</a></p>
-    </div>
-  </div>
-   
-  <div class="row mb-2">
-    <div class="col-md-6">
-      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-        <div class="col p-4 d-flex flex-column position-static">
-          
-          <h3 class="mb-0">Featured post</h3>
-          <div class="mb-1 text-body-secondary">Nov 12</div>
-          <p class="card-text mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-          <a href="#" class="icon-link gap-1 icon-link-hover stretched-link">
-            Continue reading
-            <svg class="bi"><use xlink:href="#chevron-right"></use></svg>
-          </a>
-        </div>
-        <div class="col-auto d-none d-lg-block">
-          <svg class="bd-placeholder-img" width="200" height="250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
-        </div>
+
+
+
+
+  <main class="container">
+
+    <div class="  mb-4 rounded text-body-emphasis bg-body-secondary position-relative">
+      <img src="/static/images/homepage2.png" class="img-fluid" id="picture">
+      <div class="position-absolute bottom-0">
+        <h1 class="display-4 fst-italic ibm-plex-serif-bold">Dish Map</h1>
+        <p class="lead my-3">discover dishes that connect with you</p>
+        <p class="lead mb-0"><a href="#" class="text-body-emphasis fw-bold">Continue reading...</a></p>
       </div>
     </div>
-    <div class="col-md-6">
-      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-        <div class="col p-4 d-flex flex-column position-static">
-          <strong class="d-inline-block mb-2 text-success-emphasis">Design</strong>
-          <h3 class="mb-0">Post title</h3>
-          <div class="mb-1 text-body-secondary">Nov 11</div>
-          <p class="mb-auto">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-          <a href="#" class="icon-link gap-1 icon-link-hover stretched-link">
-            Continue reading
-            <svg class="bi"><use xlink:href="#chevron-right"></use></svg>
-          </a>
+
+
+    <div class="row mb-2">
+      <div class="colum-md-6">
+        <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+          <div class="col p-4 d-flex flex-column position-static">
+            <img src="/static/images/Untitled (3).png" alt="Logo" width="150" class="d-inline-block align-text-top">
+            <h3 class="mb-0">LA SOVA</h3>
+            <div class="mb-1 text-body-secondary">Nov 11</div>
+            <p class="mb-auto">Gourmet kosher take-out and catering establishment supplying comfort food and quick bites
+            </p>
+            <a href="#" class="icon-link gap-1 icon-link-hover stretched-link">
+              Continue reading
+              <svg class="bi">
+                <use xlink:href="#chevron-right"></use>
+              </svg>
+            </a>
+          </div>
+          <div class="col-2 d-none d-lg-block">
+            <img class="img-fluid" src="/static/images/restaurants/la_sova_image.jpg">
+          </div>
         </div>
-        <div class="col-auto d-none d-lg-block">
-          <svg class="bd-placeholder-img" width="200" height="250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+        <div class="col-md-8">
+        <div class="row">
+         <div class="col-sm-6 col-md-4">
+          <img class="img-fluid" src="/static/images/restaurants/la_sova_image.jpg">
+          </div>
+        
         </div>
-      </div>
-    </div>
-  </div>
+          <h3 class="pb-4 mb-4 fst-italic border-bottom">
+            from the dishmap onwers
+          </h3>
+
+          <article class="blog-post">
+            <h2 class="display-5 link-body-emphasis mb-1">About Dish Map</h2>
+            <p class="blog-post-meta">apirl 1, 2025 by <a href="#">Santiago Cardenas,Benny Wang</a></p>
+
+            <p>DishMap is an innovative app designed to help individuals find restaurants that accommodate dietary
+              restrictions due to religious practices. Whether you follow halal, kosher, or any other religious dietary
+              laws, DishMap allows you to filter restaurants that offer menu options in line with your beliefs. By
+              simply inputting your religious dietary needs, the app generates a list of nearby restaurants that provide
+              dishes compliant with your requirements. User reviews and ratings from others with similar religious
+              dietary practices help ensure that the dining experience is both safe and satisfying.
+            <p></p>
+            In addition to locating suitable restaurants, DishMap offers detailed information on menu items, including
+            certification of halal or kosher dishes, ingredient transparency, and any potential cross-contamination
+            risks. The app integrates with GPS to help users find the closest restaurants, and it provides real-time
+            updates on new places or changes to existing menus that meet specific religious dietary laws. With
+            DishMap, individuals can confidently explore dining options, knowing they can enjoy meals that align with
+            their religious beliefs while eating out with ease.</p>
+            <hr>
+            <p>In the future we hope to exapand on this idea thats why it is very important for the user of this app
+              give us feedback to improve the better quality of dishmap and make the user feel satisfied with or app we
+              thank you for your supports.</p>
+            
+      
+        </div>
+
+
+
+  </main>
+
+
 
 
 
