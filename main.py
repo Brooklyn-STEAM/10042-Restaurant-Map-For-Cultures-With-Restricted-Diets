@@ -501,6 +501,11 @@ def map_page():
                            dietary_restriction_list = dietary_restriction_list,
                            user_favorite_present = user_favorite_present)
 
+
+
+@app.route("/contact" , methods=["POST", "GET"])
+def contact_page():
+    return render_template("contact_page.html.jinja")
 # @app.route("/cart")
 # @flask_login.login_required
 # def cart_page():
