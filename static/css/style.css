@@ -12,3 +12,20 @@
     border: none;
     width: 100%;
 }
+
+#nav-primary{
+    background-image: url("../images/navbar_background.png");
+
+    & li:hover{
+        background-color: lightcyan;
+
+    }
+
+    & li{
+        padding: 1rem;
+    } 
+
+}
+.account-dropdown li{
+    padding: 0rem !important;
+}
