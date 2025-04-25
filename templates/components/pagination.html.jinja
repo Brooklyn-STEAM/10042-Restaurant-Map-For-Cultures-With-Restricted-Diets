@@ -1,0 +1,44 @@
+{%set current_page = 10%}
+<nav class="BW-nav-browser-pagination">
+    <ul class="BW-ul-pagination-vertical">
+        <li class="BW-li-pagination-item BW-pagination-back">            
+            <label for="radio-pagination-back-{{ group }}">
+                <input type="radio" id="radio-pagination-back-{{ group }}" name="pagination-{{ group }}">
+
+                <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
+                    <path d="M14 8L7.5 1 1 8m13 5.5l-6.5-7-6.5 7" stroke="currentColor" stroke-linecap="square"></path>
+                </svg>
+            </label>
+        </li>
+        <li class="BW-li-pagination-item BW-pagination-min">
+            <label for="radio-pagination-min-{{ group }}">
+                <input type="radio" id="radio-pagination-min-{{ group }}" name="pagination-{{ group }}">
+
+                <p>1</p>
+            </label>
+        </li>
+        <li class="BW-li-pagination-item BW-pagination-current">
+            <label for="radio-pagination-current-{{ group }}">
+                <input type="radio" id="radio-pagination-current-{{ group }}" name="pagination-{{ group }}">
+
+                <input type="number" name="selected-page" placeholder="{% if current_page == 1 %} ... {% else %} {{current_page}} {% endif %}">
+            </label>
+        </li>
+        <li class="BW-li-pagination-item BW-pagination-max">
+            <label for="radio-pagination-max-{{ group }}">
+                <input type="radio" id="radio-pagination-max-{{ group }}" name="pagination-{{ group }}">
+                
+                <p>max</p>
+            </label>
+        </li>
+        <li class="BW-li-pagination-item BW-pagination-forward">
+            <label for="radio-pagination-forward-{{ group }}">
+                <input type="radio" id="radio-pagination-forward-{{ group }}" name="pagination-{{ group }}">
+
+                <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
+                    <path d="M1 7l6.5 7L14 7M1 1.5l6.5 7 6.5-7" stroke="currentColor" stroke-linecap="square"></path>
+                </svg>
+            </label>
+        </li>
+    </ul>
+</nav>

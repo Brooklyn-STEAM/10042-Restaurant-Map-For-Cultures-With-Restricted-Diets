@@ -15,11 +15,11 @@ def search_result_return(cursor, base_restaurant_information_sql):
     query = request.args.get("query")
     dietary_restriction_radio = request.args.get("dietary_restriction_radio")
     
-
-
     price_min_filter = request.args.get('price_min_filter')
     price_max_filter = request.args.get('price_max_filter')
     exact_price_toggle = request.args.get("exact_price_toggle")
+
+    
 
     search_present = False
 

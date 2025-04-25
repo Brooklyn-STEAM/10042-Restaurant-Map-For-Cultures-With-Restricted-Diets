@@ -49,45 +49,15 @@
 
     <hr>
 
-    <form id="pagination-recommendations">
-        <nav class="BW-nav-browser-pagination">
-            <ul class="BW-ul-pagination-vertical">
-                <li class="BW-li-pagination-item BW-pagination-back">
-                    <input type="radio">
-                    
-                    <div>
-                        <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
-                            <path d="M14 8L7.5 1 1 8m13 5.5l-6.5-7-6.5 7" stroke="currentColor" stroke-linecap="square"></path>
-                        </svg>
-                    </div>
-                </li>
-                <li class="BW-li-pagination-item BW-pagination-min">
-                    <input type="radio">
-
-                    <div>1</div>
-                </li>
-                <li class="BW-li-pagination-item BW-pagination-current">
-                    <input type="number">
-                </li>
-                <li class="BW-li-pagination-item BW-pagination-max">
-                    <input type="radio">
-
-                    <div>max</div>
-                </li>
-                <li class="BW-li-pagination-item BW-pagination-forward">
-                    <input type="radio">
-                    <div>
-                        <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
-                            <path d="M1 7l6.5 7L14 7M1 1.5l6.5 7 6.5-7" stroke="currentColor" stroke-linecap="square"></path>
-                        </svg>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-    </form>
     <section class="section-browser-recommendations">
-        <h2>Recommendations</h2>
+
+        <h2 class="h2-browser-header">Recommendations</h2>
         <section class="section-card-group">
+            <form id="form-pagination-recommendations">
+                {% with group="recommendations" %}
+                    {% include "components/pagination.html.jinja" %}
+                {% endwith%}
+            </form>
             {% for restaurant in restaurant_information %}
                 {% with restaurant = restaurant %}
                     {% include "components/restaurant_card.html.jinja"%}
