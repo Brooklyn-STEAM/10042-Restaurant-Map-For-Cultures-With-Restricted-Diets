@@ -11,16 +11,7 @@ def empty_value_filter(values):
         
     return filter_results
 
-def search_result_return(cursor, base_restaurant_information_sql):
-    query = request.args.get("query")
-    dietary_restriction_radio = request.args.get("dietary_restriction_radio")
-    
-    price_min_filter = request.args.get('price_min_filter')
-    price_max_filter = request.args.get('price_max_filter')
-    exact_price_toggle = request.args.get("exact_price_toggle")
-
-    
-
+def search_sql_return(base_restaurant_information_sql, query, dietary_restriction_radio, price_min_filter, price_max_filter, exact_price_toggle):
     search_present = False
 
     if dietary_restriction_radio:
@@ -77,11 +68,10 @@ def search_result_return(cursor, base_restaurant_information_sql):
         filtered_search_WHERE_conditions_sql_list = empty_value_filter(search_WHERE_conditions_sql_list)
         search_WHERE_conditions_sql =  " WHERE " + " AND ".join(filtered_search_WHERE_conditions_sql_list)
         
-        search_restaurant_information_sql = base_restaurant_information_sql + RestaurantDietaryRestriction_JOIN_sql + search_WHERE_conditions_sql + ";"
+
+        search_restaurant_information_sql = base_restaurant_information_sql + RestaurantDietaryRestriction_JOIN_sql + search_WHERE_conditions_sql + " LIMIT 20" + ";"
         
-        cursor.execute(search_restaurant_information_sql)
-        search_restaurant_results = cursor.fetchall()
-        return search_restaurant_results
+        return search_restaurant_information_sql
     else:
         return None
 
@@ -89,6 +79,7 @@ from flask import Flask, render_template, request, redirect, flash, abort
 import pymysql
 from dynaconf import Dynaconf
 import flask_login
+from math import ceil
 
 app = Flask(__name__) 
 
@@ -257,6 +248,24 @@ def restaurant_browser():
     cursor = conn.cursor()
     current_user_id = flask_login.current_user.id
     
+    # Pagination
+    cursor.execute(f"""
+                    SELECT 
+                    COUNT(FavoriteRestaurants.user_id = 1) AS "favNum",
+                    COUNT(*) AS "allNum"
+                FROM
+                    Restaurant
+                LEFT JOIN 
+                    FavoriteRestaurants ON 
+                        Restaurant.id = FavoriteRestaurants.restaurant_id 
+                        AND 
+                        FavoriteRestaurants.user_id = {current_user_id};
+    """)
+    num_of_results = cursor.fetchone()
+    num_of_fav = num_of_results["favNum"]
+    num_of_all = num_of_results["allNum"]
+
+
     base_restaurant_information_sql = f"""
                 SELECT Restaurant.id as restaurant_id,
                         name, 
@@ -271,20 +280,98 @@ def restaurant_browser():
                     ON Restaurant.id = FavoriteRestaurants.restaurant_id 
                         AND FavoriteRestaurants.user_id = {current_user_id}
                 """
+    # Search
+    query = request.args.get("query")
+    dietary_restriction_radio = request.args.get("dietary_restriction_radio")
     
-    search_information = search_result_return(cursor, base_restaurant_information_sql)
+    price_min_filter = request.args.get('price_min_filter')
+    price_max_filter = request.args.get('price_max_filter')
+    exact_price_toggle = request.args.get("exact_price_toggle")
 
-    # Favorite + Recommendation
-    cursor.execute(base_restaurant_information_sql + ";")
+    search_restaurant_information_sql = search_sql_return(base_restaurant_information_sql, query, dietary_restriction_radio, price_min_filter, price_max_filter, exact_price_toggle)
+
+    try:
+        cursor.execute(search_restaurant_information_sql)
+        search_restaurant_results = cursor.fetchall()
+    except:
+        search_restaurant_results = None
+
+    # Favorite 
+    favorite_pagination = request.args.get("pagination-favorites")
+    selected_page_fav = int(request.args.get("selected-page-favorites"))
+
+    
+    if favorite_pagination == "back":
+        favorite_page = selected_page_fav - 1
+        if favorite_page <= 0:
+            favorite_page = 1
+    elif favorite_pagination == "min":
+        favorite_page = 1
+    elif favorite_pagination == "current":
+        favorite_page = selected_page_fav
+    elif favorite_pagination == "max":
+        favorite_page = ceil(num_of_fav / 10)
+    elif favorite_pagination == "forward":
+        favorite_page = selected_page_fav + 1
+        if favorite_page > ceil(num_of_fav / 10):
+            favorite_page = ceil(num_of_fav / 10)
+    else:
+        favorite_page = 1
+
+    cursor.execute(f"""
+                SELECT Restaurant.id as restaurant_id,
+                        name, 
+                        type,  
+                        min_cost, 
+                        max_cost, 
+                        image, 
+                        FavoriteRestaurants.id as favorite_restaurants_id,
+                        FavoriteRestaurants.user_id 
+                FROM Restaurant 
+                JOIN FavoriteRestaurants 
+                    ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                        AND FavoriteRestaurants.user_id = {current_user_id}
+                LIMIT {(favorite_page - 1 ) * 10}, 10
+                """)
+    favorite_restaurant_information = cursor.fetchall()
+    # Recommendation
+    recommendation_pagination = request.args.get("pagination-recommendations")
+    selected_page_recommendation = int(request.args.get("selected-page-recommendations"))
+
+
+    if recommendation_pagination == "back":
+        recommendation_page = selected_page_recommendation - 1
+        if recommendation_page <= 0:
+            recommendation_page = 1
+    elif recommendation_pagination == "min":
+        recommendation_page = 1
+    elif recommendation_pagination == "current":
+        recommendation_page = selected_page_recommendation
+    elif recommendation_pagination == "max":
+        recommendation_page = ceil(num_of_fav / 10)
+    elif recommendation_pagination == "forward":
+        recommendation_page = selected_page_recommendation + 1
+        if recommendation_page > ceil(num_of_fav / 10):
+            recommendation_page = ceil(num_of_fav / 10)
+    else:
+        favorite_page = 1
+    
+    cursor.execute(f"""
+                SELECT Restaurant.id as restaurant_id,
+                        name, 
+                        type,  
+                        min_cost, 
+                        max_cost, 
+                        image, 
+                FROM Restaurant 
+                LIMIT {(recommendation_page - 1 ) * 10}, 10
+                """)
     restaurant_information = cursor.fetchall()
 
     # Dietary Restriction
     cursor.execute("SELECT * FROM DietaryRestriction")
     dietary_restriction_list = cursor.fetchall()
 
-    # Pagination
-    cursor.execute("SELECT * FROM DietaryRestriction")
-    dietary_restriction_list = cursor.fetchall()
 
     cursor.close()
     conn.close()
@@ -297,9 +384,10 @@ def restaurant_browser():
 
     return render_template("restaurant_browser_page.html.jinja", 
                            restaurant_information = restaurant_information,
-                           search_information = search_information, 
+                           search_information = search_restaurant_results, 
                            dietary_restriction_list = dietary_restriction_list,
-                           user_favorite_present = user_favorite_present)
+                           user_favorite_present = user_favorite_present,
+                           current_page_recommendations = 1, current_page_favorites = 1)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
 @flask_login.login_required
@@ -481,7 +569,7 @@ def map_page():
                         AND FavoriteRestaurants.user_id = {current_user_id}
                 """
     
-    search_information = search_result_return(cursor, base_restaurant_information_sql)
+    search_information = search_sql_return(cursor, base_restaurant_information_sql)
 
     # Favorite + Recommendation
     cursor.execute(base_restaurant_information_sql + ";")

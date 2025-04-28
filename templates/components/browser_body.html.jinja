@@ -33,6 +33,11 @@
     <section class="section-browser-favorites">
         <h2>Favorites</h2>  
         <section class="section-card-group">
+            <form id="form-pagination-favorites">
+                {% with group="favorites", current_page = current_page_favorites %}
+                    {% include "components/pagination.html.jinja" %}
+                {% endwith%}
+            </form>
             {% if user_favorite_present %}
                 {% for restaurant in restaurant_information %}
                     {% if (restaurant["user_id"] == current_user.id) %}
@@ -54,7 +59,7 @@
         <h2 class="h2-browser-header">Recommendations</h2>
         <section class="section-card-group">
             <form id="form-pagination-recommendations">
-                {% with group="recommendations" %}
+                {% with group="recommendations", current_page = current_page_recommendations %}
                     {% include "components/pagination.html.jinja" %}
                 {% endwith%}
             </form>
