@@ -13,6 +13,7 @@
     width: 100%;
 }
 
+
 .categoryOfRestaurantCards{
     height: 75vmin;
     overflow-y: hidden;
@@ -113,3 +114,5 @@ html, body {
     height: 100vh;
     margin: 0px;
 }
+
+
