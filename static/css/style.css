@@ -13,8 +13,49 @@
     width: 100%;
 }
 
+
+.categoryOfRestaurantCards{
+    height: 75vmin;
+    overflow-y: hidden;
+    overflow-x: scroll;
+    white-space: nowrap;
+    & > .card{
+        display: inline-block;
+        max-width: 100vw;
+        max-height: 100vh;
+        height: 100%; 
+        aspect-ratio: 1 / 2;
+        background-color: rgb(161, 206, 235);
+        
+        
+        & > .header-card-topButtons{
+            max-height: 45px;
+            height: 10%;
+            
+            
+            & *{
+                height: 100%;
+                width: auto;
+                aspect-ratio: 1 / 1;
+            };
+        };
+        
+        & > .a-card-main{
+            height: 90%;
+            aspect-ratio: 1 / 2;
+            
+            
+            & > .sections-card-imgsBox{
+                height: 50%;
+                aspect-ratio: 1 / 1;
+          }
+      }
+  }
+}
+      
 #nav-primary{
     background-image: url("../images/navbar_background.png");
+
 
     & li:hover{
         background-color: lightcyan;
