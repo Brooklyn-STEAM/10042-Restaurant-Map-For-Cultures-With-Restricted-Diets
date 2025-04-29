@@ -9,10 +9,15 @@
 %}
 <section class="section-browser-body">
     <section class="section-browser-searchs">
-        {% if search_information %}
+        {% if search_results %}
             <h2>Search Results</h2>
             <section class="section-card-group">
-                {% for restaurant in search_information %}
+                <form id="form-pagination-searchs">
+                    {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
+                        {% include "components/pagination.html.jinja" %}
+                    {% endwith%}
+                </form>
+                {% for restaurant in search_results %}
                     {% with restaurant = restaurant %}
                             {% include "components/restaurant_card.html.jinja"%}
                     {% endwith %}
@@ -34,17 +39,15 @@
         <h2>Favorites</h2>  
         <section class="section-card-group">
             <form id="form-pagination-favorites">
-                {% with group="favorites", current_page = current_page_favorites %}
+                {% with group="favorites", current_page = current_paginationFavorites_int, max_page = max_paginationFavorites %}
                     {% include "components/pagination.html.jinja" %}
                 {% endwith%}
             </form>
-            {% if user_favorite_present %}
-                {% for restaurant in restaurant_information %}
-                    {% if (restaurant["user_id"] == current_user.id) %}
-                        {% with restaurant = restaurant %}
-                            {% include "components/restaurant_card.html.jinja"%}
-                        {% endwith %}
-                    {% endif %}
+            {% if (favorite_results|length) > 0 %}
+                {% for restaurant in favorite_results %}
+                    {% with restaurant = restaurant %}
+                        {% include "components/restaurant_card.html.jinja"%}
+                    {% endwith %}
                 {% endfor %}
             {% else %}
                     <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
@@ -59,11 +62,11 @@
         <h2 class="h2-browser-header">Recommendations</h2>
         <section class="section-card-group">
             <form id="form-pagination-recommendations">
-                {% with group="recommendations", current_page = current_page_recommendations %}
+                {% with group="recommendations", current_page = current_paginationRecommendations_int, max_page = max_paginationRecommendations %}
                     {% include "components/pagination.html.jinja" %}
                 {% endwith%}
             </form>
-            {% for restaurant in restaurant_information %}
+            {% for restaurant in recommendation_results %}
                 {% with restaurant = restaurant %}
                     {% include "components/restaurant_card.html.jinja"%}
                 {% endwith %}
