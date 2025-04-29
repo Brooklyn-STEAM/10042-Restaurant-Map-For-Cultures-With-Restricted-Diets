@@ -48,71 +48,24 @@
             & > .sections-card-imgsBox{
                 height: 50%;
                 aspect-ratio: 1 / 1;
-
-                & > .figure-card-imgFrame{
-                    overflow: hidden;
-                    & > img {
-                        max-width: 100%;
-                        max-height: 100%;
-                        width: min-content;
-                        aspect-ratio: 1 / 1;
-                        object-fit: cover;
-                    };
-
-                    & > img:hover {
-                        max-width: 100%;
-                        max-height: 100%;
-                        position: absolute;
-                        object-fit: contain;
-                    };
-                };
-            };
-
-            .card-body{
-                height: 50%;
-                aspect-ratio: 1 / 1;
-                background-color: transparent;
-                white-space: wrap;
-            };
-        };
-    };
-};
-
-.main-map-container{
-    flex-grow: 1; 
-    position:relative;
-    overflow: hidden;
-    
-    & > .aside-miniBrowser-container{
-        position: absolute;
-        z-index: 1;
-        right: 0px;
-        top: 0px;
-        width: 100px;
-        overflow-y: scroll;
-        & > .header-miniBrowser-searchbar{
-            height: fit-content;
-        };
-        & > .section-miniBrowser-body{
+          }
+      }
+  }
+      
+#nav-primary{
+    background-image: url("../images/navbar_background.png");
 
 
-            & > .section-miniBrowser-searchResults, & > .section-miniBrowser-favorites, & > .section-miniBrowser-recommendations{
-                
-                & > .categoryOfRestaurantCards{
-                    height: 50vmin;
-                };
-            };
+    & li:hover{
+        background-color: lightcyan;
 
-        };
-    };
+    }
 
-};
+    & li{
+        padding: 1rem;
+    } 
 
-
-html, body {
-    width: 100vw;
-    height: 100vh;
-    margin: 0px;
 }
-
-
+.account-dropdown li{
+    padding: 0rem !important;
+}

@@ -1,88 +1,159 @@
 .ibm-plex-serif-thin {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 100;
-    font-style: normal;
-  }
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 100;
+  font-style: normal;
+}
   
-  .ibm-plex-serif-extralight {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 200;
-    font-style: normal;
-  }
+.ibm-plex-serif-extralight {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 200;
+  font-style: normal;
+}
   
-  .ibm-plex-serif-light {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 300;
-    font-style: normal;
-  }
+.ibm-plex-serif-light {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 300;
+  font-style: normal;
+}
   
-  .ibm-plex-serif-regular {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 400;
-    font-style: normal;
-  }
+.ibm-plex-serif-regular {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.ibm-plex-serif-medium {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.ibm-plex-serif-semibold {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.ibm-plex-serif-bold {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.ibm-plex-serif-thin-italic {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 100;
+  font-style: italic;
+}
+
+.ibm-plex-serif-extralight-italic {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 200;
+  font-style: italic;
+}
+
+.ibm-plex-serif-light-italic {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.ibm-plex-serif-regular-italic {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.ibm-plex-serif-medium-italic {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.ibm-plex-serif-semibold-italic {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.ibm-plex-serif-bold-italic {
+  font-family: "IBM Plex Serif", serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.body-map-page{
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+
   
-  .ibm-plex-serif-medium {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 500;
-    font-style: normal;
-  }
-  
-  .ibm-plex-serif-semibold {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 600;
-    font-style: normal;
-  }
-  
-  .ibm-plex-serif-bold {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 700;
-    font-style: normal;
-  }
-  
-  .ibm-plex-serif-thin-italic {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 100;
-    font-style: italic;
-  }
-  
-  .ibm-plex-serif-extralight-italic {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 200;
-    font-style: italic;
-  }
-  
-  .ibm-plex-serif-light-italic {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 300;
-    font-style: italic;
-  }
-  
-  .ibm-plex-serif-regular-italic {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 400;
-    font-style: italic;
-  }
-  
-  .ibm-plex-serif-medium-italic {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 500;
-    font-style: italic;
-  }
-  
-  .ibm-plex-serif-semibold-italic {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 600;
-    font-style: italic;
-  }
-  
-  .ibm-plex-serif-bold-italic {
-    font-family: "IBM Plex Serif", serif;
-    font-weight: 700;
-    font-style: italic;
-  }
-  
-  #map { 
+  & > .main-map-container{
+    flex-shrink: 1;
+    flex-grow: 0;
+    min-height: 0px;
     position: relative;
-    z-index: 0;
-    height: 1000px; } 
+    overflow: hidden;
+  }
+}
+
+#map { 
+  height: 1000px; 
+  z-index: 0;
+
+}
+
+.aside-browser{
+  position: absolute;
+  z-index: 1;
+  right: 0px;
+  top: 0px;
+
+  width: 40%;
+  height: 100%;
+
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+  @media only screen and (max-width: 400px) {
+    width: 60%;
+  }
+
+  & > *{
+    background-color: aliceblue;
+    padding: 0px 2vw 0px;
+    border: 2px solid black;
+  }
+
+  & > .header-browser-searchbar{
+
+    & .input-group{
+      margin-bottom: 0px;
+    }
+
+    & > #accordion-miniBrowser-toogleBtn{
+      width: 100%;
+    }
+  }
+
+  & > #accordion-miniBrowser{
+
+
+    & > .section-browser-body{
+      max-height: 100%;
+      padding-bottom: 100px;
+
+
+      & > .section-browser-searchs:has(>*), .section-browser-favorites:has(>*), .section-browser-recommendations:has(>*){
+        width: 100%;
+        min-height: 400px;
+        height: 50vmin;
+        display: flex;
+        flex-direction: column;
+      }
+  
+    }
+  }
+
+}
+
