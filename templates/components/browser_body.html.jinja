@@ -12,11 +12,11 @@
         {% if search_results %}
             <h2>Search Results</h2>
             <section class="section-card-group">
-                <form id="form-pagination-searchs">
+                <div id="form-pagination-searchs">
                     {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
                         {% include "components/pagination.html.jinja" %}
                     {% endwith%}
-                </form>
+                </div>
                 {% for restaurant in search_results %}
                     {% with restaurant = restaurant %}
                             {% include "components/restaurant_card.html.jinja"%}
@@ -26,22 +26,22 @@
         {% elif current_paginationSearchs_int > max_paginationsearchs %}
             <h2>Search Results</h2>
             <section class="section-card-group">
-                <form id="form-pagination-searchs">
+                <div id="form-pagination-searchs">
                     {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
                         {% include "components/pagination.html.jinja" %}
                     {% endwith%}
-                </form>
+                </div>
                 <p>You don't have more than {{ max_paginationsearchs }} pages of search results.</p>
                 <p>You are on page {{ current_paginationSearchs_int }} of search results.</p>
             </section>
         {% elif search_input %}
             <h2>Search Results</h2>
             <section class="section-card-group">
-                <form id="form-pagination-searchs">
+                <div id="form-pagination-searchs">
                     {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
                         {% include "components/pagination.html.jinja" %}
                     {% endwith%}
-                </form>
+                </div>
                 <p>No Match</p>                
             </section>
         {% endif %}
@@ -54,11 +54,11 @@
     <section class="section-browser-favorites">
         <h2>Favorites</h2>  
         <section class="section-card-group">
-            <form id="form-pagination-favorites">
+            <div id="form-pagination-favorites">
                 {% with group="favorites", current_page = current_paginationFavorites_int, max_page = max_paginationFavorites %}
                     {% include "components/pagination.html.jinja" %}
                 {% endwith%}
-            </form>
+            </div>
             {% if (favorite_results|length) > 0 %}
                 {% for restaurant in favorite_results %}
                     {% with restaurant = restaurant %}
@@ -80,11 +80,11 @@
 
         <h2 class="h2-browser-header">Recommendations</h2>
         <section class="section-card-group">
-            <form id="form-pagination-recommendations">
+            <div id="form-pagination-recommendations">
                 {% with group="recommendations", current_page = current_paginationRecommendations_int, max_page = max_paginationRecommendations %}
                     {% include "components/pagination.html.jinja" %}
                 {% endwith%}
-            </form>
+            </div>
             {% if recommendation_results|length > 0 %}
                 {% for restaurant in recommendation_results %}
                     {% with restaurant = restaurant %}

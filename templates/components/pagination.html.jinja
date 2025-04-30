@@ -2,7 +2,7 @@
     <ul class="BW-ul-pagination-vertical">
         <li class="BW-li-pagination-item BW-pagination-back">            
             <label for="radio-pagination-back-{{ group }}">
-                <input type="radio" id="radio-pagination-back-{{ group }}" name="pagination-{{ group }}" value="back">
+                <input type="radio" id="radio-pagination-back-{{ group }}" name="pagination-{{ group }}" value="back" form="searchBar_form">
 
                 <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
                     <path d="M14 8L7.5 1 1 8m13 5.5l-6.5-7-6.5 7" stroke="currentColor" stroke-linecap="square"></path>
@@ -11,28 +11,28 @@
         </li>
         <li class="BW-li-pagination-item BW-pagination-min">
             <label for="radio-pagination-min-{{ group }}">
-                <input type="radio" id="radio-pagination-min-{{ group }}" name="pagination-{{ group }}" value="min">
+                <input type="radio" id="radio-pagination-min-{{ group }}" name="pagination-{{ group }}" value="min" form="searchBar_form">
 
                 <p>1</p>
             </label>
         </li>
         <li class="BW-li-pagination-item BW-pagination-current">
             <label for="radio-pagination-current-{{ group }}">
-                <input type="radio" id="radio-pagination-current-{{ group }}" name="pagination-{{ group }}" value="current">
+                <input type="radio" id="radio-pagination-current-{{ group }}" name="pagination-{{ group }}" value="current" form="searchBar_form">
 
-                <input type="number" id="number-pagination-current-{{ group }}" name="selected-page-{{ group }}" value="{{ current_page }}" onfocus="check_currentPagination('{{ group }}')">
+                <input type="number" id="number-pagination-current-{{ group }}" name="selected-page-{{ group }}" value="{{ current_page }}" onfocus="check_currentPagination('{{ group }}')" form="searchBar_form">
             </label>
         </li>
         <li class="BW-li-pagination-item BW-pagination-max">
             <label for="radio-pagination-max-{{ group }}">
-                <input type="radio" id="radio-pagination-max-{{ group }}" name="pagination-{{ group }}" value="max">
+                <input type="radio" id="radio-pagination-max-{{ group }}" name="pagination-{{ group }}" value="max" form="searchBar_form">
                 
                 <p>{{ max_page }}</p>
             </label>
         </li>
         <li class="BW-li-pagination-item BW-pagination-forward">
             <label for="radio-pagination-forward-{{ group }}">
-                <input type="radio" id="radio-pagination-forward-{{ group }}" name="pagination-{{ group }}" value="forward">
+                <input type="radio" id="radio-pagination-forward-{{ group }}" name="pagination-{{ group }}" value="forward" form="searchBar_form">
 
                 <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
                     <path d="M1 7l6.5 7L14 7M1 1.5l6.5 7 6.5-7" stroke="currentColor" stroke-linecap="square"></path>
@@ -41,6 +41,6 @@
         </li>
     </ul>
 </nav>
-<button type="submit">
+<button type="submit" form="searchBar_form">
     Submit
 </button>
