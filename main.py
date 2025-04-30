@@ -345,7 +345,7 @@ def restaurant_browser():
     paginationFavorites_radio = request.args.get("pagination-favorites")
     paginationRecommendations_radio = request.args.get("pagination-recommendations")
 
-    limit = 1
+    limit = 10
 
     try:
         selected_paginationSearchs = int(request.args.get("selected-page-searchs"))
