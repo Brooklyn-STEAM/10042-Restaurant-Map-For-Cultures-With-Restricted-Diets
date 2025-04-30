@@ -626,49 +626,139 @@ def restaurant_review_update(restaurant_id):
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
-    current_user_id = flask_login.current_user.id
+
+    currentUser_id = flask_login.current_user.id
     
-    base_restaurant_information_sql = f"""
+    query = request.args.get("query")
+    dietaryRestriction_id = request.args.get("dietary_restriction_radio")
+
+    minFilter_price = request.args.get('price_min_filter')
+    maxFilter_price = request.args.get('price_max_filter')
+    exactPrice_radioToggle = request.args.get("exact_price_toggle")
+
+    paginationSearchs_radio = request.args.get("pagination-searchs")
+    paginationFavorites_radio = request.args.get("pagination-favorites")
+    paginationRecommendations_radio = request.args.get("pagination-recommendations")
+
+    limit = 10
+
+    try:
+        selected_paginationSearchs = int(request.args.get("selected-page-searchs"))
+    except:
+        selected_paginationSearchs = 1
+
+    try:
+        selected_paginationFavorites = int(request.args.get("selected-page-favorites"))
+    except:
+        selected_paginationFavorites = 1
+
+    try:
+        selected_paginationRecommendations = int(request.args.get("selected-page-recommendations"))
+    except:
+        selected_paginationRecommendations = 1
+
+    cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
+                FROM Restaurant
+                LEFT JOIN FavoriteRestaurants ON 
+                    Restaurant.id = FavoriteRestaurants.restaurant_id AND FavoriteRestaurants.user_id = {currentUser_id};
+    """)
+    fav_rec_count = cursor.fetchone()
+    max_paginationFavorites = ceil(fav_rec_count["favNum"] / limit)
+    max_paginationRecommendations = ceil(fav_rec_count["allNum"] / limit)
+
+    if query or dietaryRestriction_id or minFilter_price or maxFilter_price:
+        searchOffset_int = 0
+        searchCOUNT_SQL = return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_radioToggle, searchOffset_int, True, limit)
+        cursor.execute(searchCOUNT_SQL)
+        searchCOUNT_resultRaw = cursor.fetchone()
+        max_paginationSearchs = ceil(searchCOUNT_resultRaw["searchAll"] / limit)
+
+        if max_paginationSearchs < 1:
+            max_paginationSearchs = 1
+        
+    else:
+        max_paginationSearchs = 1
+
+    # maxPagination_list = [max_paginationSearchs, max_paginationFavorites, max_paginationRecommendations]
+    # for maxPagination in maxPagination_list:
+    #     if maxPagination < 1:
+    #         maxPagination = 1
+
+
+    try:
+        current_paginationSearchs_int = return_currentPage(paginationSearchs_radio, max_paginationSearchs, selected_paginationSearchs)
+    except:
+        current_paginationSearchs_int = 1
+
+    current_paginationFavorites_int = return_currentPage(paginationFavorites_radio, max_paginationFavorites, selected_paginationFavorites)
+    current_paginationRecommendations_int = return_currentPage(paginationRecommendations_radio, max_paginationRecommendations, selected_paginationRecommendations)
+
+    searchOffset_int = limit * (current_paginationSearchs_int - 1)
+    favoriteOffset_int = limit * (current_paginationFavorites_int - 1)
+    recommendationOffset_int = limit * (current_paginationRecommendations_int - 1)
+
+
+
+    if query or dietaryRestriction_id or minFilter_price or maxFilter_price:
+        search_SQL = return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_radioToggle, searchOffset_int, False, limit)
+        cursor.execute(search_SQL)
+        search_results = cursor.fetchall()
+    else:
+        search_results = ""
+
+    # Favorite 
+    cursor.execute(f"""
                 SELECT Restaurant.id as restaurant_id,
                         name, 
-                        type, 
+                        type,  
                         min_cost, 
                         max_cost, 
                         image, 
-                        lng, 
-                        lat, 
                         FavoriteRestaurants.id as favorite_restaurants_id,
                         FavoriteRestaurants.user_id 
                 FROM Restaurant 
-                LEFT JOIN FavoriteRestaurants 
+                JOIN FavoriteRestaurants 
                     ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                        AND FavoriteRestaurants.user_id = {current_user_id}
-                """
-    
-    search_information = search_sql_return(cursor, base_restaurant_information_sql)
-
-    # Favorite + Recommendation
-    cursor.execute(base_restaurant_information_sql + ";")
-    restaurant_information = cursor.fetchall()
+                        AND FavoriteRestaurants.user_id = {currentUser_id}
+                LIMIT {favoriteOffset_int}, {limit};
+                """)
+    favorite_results  = cursor.fetchall()
+    # Recommendation
+    cursor.execute(f"""
+                SELECT  
+                    id,
+                    name, 
+                    type,  
+                    min_cost, 
+                    max_cost, 
+                    image 
+                FROM Restaurant 
+                LIMIT {recommendationOffset_int}, {limit};
+                """)
+    recommendation_results = cursor.fetchall()
 
     # Dietary Restriction
     cursor.execute("SELECT * FROM DietaryRestriction")
     dietary_restriction_list = cursor.fetchall()
 
+
     cursor.close()
     conn.close()
 
-    user_favorite_present = ""
-    for restaurant in restaurant_information:
-        if restaurant["user_id"] == current_user_id:
-            user_favorite_present = "yes"
-            break        
-
     return render_template("map.html.jinja", 
-                           restaurant_information = restaurant_information,
-                           search_information = search_information, 
-                           dietary_restriction_list = dietary_restriction_list,
-                           user_favorite_present = user_favorite_present)
+                            search_results = search_results, 
+                            current_paginationSearchs_int = current_paginationSearchs_int,
+                            max_paginationsearchs = max_paginationSearchs,
+
+                            favorite_results = favorite_results, 
+                            current_paginationFavorites_int = current_paginationFavorites_int,
+                            max_paginationFavorites = max_paginationFavorites,
+
+                            recommendation_results = recommendation_results, 
+                            current_paginationRecommendations_int = current_paginationRecommendations_int,
+                            max_paginationRecommendations = max_paginationRecommendations,
+                            
+                            dietary_restriction_list = dietary_restriction_list)
 
 
 
