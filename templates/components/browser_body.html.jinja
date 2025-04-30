@@ -23,10 +23,26 @@
                     {% endwith %}
                 {% endfor %}
             </section>
+        {% elif current_paginationSearchs_int > max_paginationsearchs %}
+            <h2>Search Results</h2>
+            <section class="section-card-group">
+                <form id="form-pagination-searchs">
+                    {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
+                        {% include "components/pagination.html.jinja" %}
+                    {% endwith%}
+                </form>
+                <p>You don't have more than {{ max_paginationsearchs }} pages of search results.</p>
+                <p>You are on page {{ current_paginationSearchs_int }} of search results.</p>
+            </section>
         {% elif search_input %}
             <h2>Search Results</h2>
             <section class="section-card-group">
-                <p>No Match</p>
+                <form id="form-pagination-searchs">
+                    {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
+                        {% include "components/pagination.html.jinja" %}
+                    {% endwith%}
+                </form>
+                <p>No Match</p>                
             </section>
         {% endif %}
     </section>
@@ -49,8 +65,11 @@
                         {% include "components/restaurant_card.html.jinja"%}
                     {% endwith %}
                 {% endfor %}
+            {% elif  current_paginationFavorites_int > max_paginationFavorites %}
+                <p>You don't have more than {{ max_paginationFavorites }} pages of favorites.</p>
+                <p>You are on page {{ current_paginationFavorites_int }} of favorites.</p>
             {% else %}
-                    <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
+                <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
             {% endif %}      
         </section>              
     </section>
@@ -66,11 +85,16 @@
                     {% include "components/pagination.html.jinja" %}
                 {% endwith%}
             </form>
-            {% for restaurant in recommendation_results %}
-                {% with restaurant = restaurant %}
-                    {% include "components/restaurant_card.html.jinja"%}
-                {% endwith %}
-            {% endfor %}
+            {% if recommendation_results|length > 0 %}
+                {% for restaurant in recommendation_results %}
+                    {% with restaurant = restaurant %}
+                        {% include "components/restaurant_card.html.jinja"%}
+                    {% endwith %}
+                {% endfor %}
+            {% elif current_paginationRecommendations_int > max_paginationRecommendations %}
+                <p>There isn't more than {{ max_paginationRecommendations }} pages of recommendations.</p>
+                <p>You are on page {{ current_paginationRecommendations_int }} of recommendations.</p>
+            {% endif %}
         </section>
     </section>
 

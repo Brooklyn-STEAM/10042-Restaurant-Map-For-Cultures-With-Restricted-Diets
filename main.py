@@ -34,17 +34,10 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
         else:
             maxPrice_SQL = ""
 
-        
-        if local_minFilter and local_maxFilter:
-            price_SQL = "(" + minPrice_SQL + " AND " + maxPrice_SQL + ")"
-        elif local_minFilter:
-            price_SQL = minPrice_SQL
-        elif local_maxFilter:
-            price_SQL = maxPrice_SQL
-        else:
-            price_SQL = ""
+        price_SQLlist = [minPrice_SQL, maxPrice_SQL]
 
-    
+        price_SQL = " AND ".join(empty_value_filter(price_SQLlist))
+
         return price_SQL
     def return_querySQL(query):
         local_query = query
@@ -114,7 +107,7 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
     if local_dietaryRestriction_id:
         dietaryRestrictionSQL = return_dietaryRestrictionSQL(local_dietaryRestriction_id)
     else:
-        dietaryRestrictionSQL = " WHERE "
+        dietaryRestrictionSQL = ""
 
     if local_query:
         querySQL = return_querySQL(local_query)
@@ -127,20 +120,18 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
         price_SQL = ""
 
     search_sqlParts = [dietaryRestrictionSQL, querySQL, price_SQL]
-    search_WHEREsql = " AND ".join(empty_value_filter(search_sqlParts))
+
+    if local_dietaryRestriction_id:
+        search_WHEREsql = " AND ".join(empty_value_filter(search_sqlParts))
+    else:
+        search_WHEREsql = " WHERE" + " AND ".join(empty_value_filter(search_sqlParts))
+        
 
     if local_count_bool:
         search_SQL = baseRestaurantInfo_SQL + search_WHEREsql + ";"
     else:
         search_SQL = baseRestaurantInfo_SQL + search_WHEREsql + f" LIMIT {local_offset_int},10;"
     
-    
-    
-    
-    
-    
-    print("bar")
-    print(search_SQL)
     return search_SQL
 
 def return_currentPage(radio_value, maxPage_number, selectedPage_number):
@@ -353,9 +344,21 @@ def restaurant_browser():
     paginationFavorites_radio = request.args.get("pagination-favorites")
     paginationRecommendations_radio = request.args.get("pagination-recommendations")
 
-    selected_paginationSearchs = request.args.get("selected-page-searchs")
-    selected_paginationFavorites = request.args.get("selected-page-favorites")
-    selected_paginationRecommendations = request.args.get("selected-page-recommendations")
+
+    try:
+        selected_paginationSearchs = int(request.args.get("selected-page-searchs"))
+    except:
+        selected_paginationSearchs = 1
+
+    try:
+        selected_paginationFavorites = int(request.args.get("selected-page-favorites"))
+    except:
+        selected_paginationFavorites = 1
+
+    try:
+        selected_paginationRecommendations = int(request.args.get("selected-page-recommendations"))
+    except:
+        selected_paginationRecommendations = 1
 
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant
@@ -371,18 +374,27 @@ def restaurant_browser():
         searchCOUNT_SQL = return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_radioToggle, searchOffset_int, True)
         cursor.execute(searchCOUNT_SQL)
         searchCOUNT_resultRaw = cursor.fetchone()
-        searchCOUNT_result = ceil(searchCOUNT_resultRaw["searchAll"] / 10)
+        max_paginationSearchs = ceil(searchCOUNT_resultRaw["searchAll"] / 10)
+
+        if max_paginationSearchs < 1:
+            max_paginationSearchs = 1
         
     else:
-        searchCOUNT_result = 1
+        max_paginationSearchs = 1
+
+    # maxPagination_list = [max_paginationSearchs, max_paginationFavorites, max_paginationRecommendations]
+    # for maxPagination in maxPagination_list:
+    #     if maxPagination < 1:
+    #         maxPagination = 1
+
+
     try:
-        current_paginationSearchs_int = return_currentPage(paginationSearchs_radio, searchCOUNT_result, selected_paginationSearchs)
+        current_paginationSearchs_int = return_currentPage(paginationSearchs_radio, max_paginationSearchs, selected_paginationSearchs)
     except:
         current_paginationSearchs_int = 1
 
     current_paginationFavorites_int = return_currentPage(paginationFavorites_radio, max_paginationFavorites, selected_paginationFavorites)
     current_paginationRecommendations_int = return_currentPage(paginationRecommendations_radio, max_paginationRecommendations, selected_paginationRecommendations)
-
 
     searchOffset_int = 10 * (current_paginationSearchs_int - 1)
     favoriteOffset_int = 10 * (current_paginationFavorites_int - 1)
@@ -439,7 +451,7 @@ def restaurant_browser():
     return render_template("restaurant_browser_page.html.jinja", 
                             search_results = search_results, 
                             current_paginationSearchs_int = current_paginationSearchs_int,
-                            max_paginationsearchs = searchCOUNT_result,
+                            max_paginationsearchs = max_paginationSearchs,
 
                             favorite_results = favorite_results, 
                             current_paginationFavorites_int = current_paginationFavorites_int,

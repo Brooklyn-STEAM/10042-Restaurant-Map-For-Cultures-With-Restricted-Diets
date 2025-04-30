@@ -25,3 +25,10 @@ function clearAllFilters() {
     clearCulturalDietaryRestrictionRadio()
     clearPriceFilterSettings()
 }
+
+function check_currentPagination(group) {
+    const paginationRadio_id = "radio-pagination-current-" + group
+    const pagination_radio = document.getElementById(paginationRadio_id)
+
+    pagination_radio.checked = true
+}

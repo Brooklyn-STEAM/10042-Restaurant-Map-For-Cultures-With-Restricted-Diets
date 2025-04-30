@@ -20,7 +20,7 @@
             <label for="radio-pagination-current-{{ group }}">
                 <input type="radio" id="radio-pagination-current-{{ group }}" name="pagination-{{ group }}" value="current">
 
-                <input type="number" name="selected-page-{{ group }}" value="{{ current_page }}">
+                <input type="number" id="number-pagination-current-{{ group }}" name="selected-page-{{ group }}" value="{{ current_page }}" onfocus="check_currentPagination('{{ group }}')">
             </label>
         </li>
         <li class="BW-li-pagination-item BW-pagination-max">
