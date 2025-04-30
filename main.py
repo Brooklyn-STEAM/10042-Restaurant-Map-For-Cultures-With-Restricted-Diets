@@ -10,7 +10,7 @@ def empty_value_filter(values):
     filter_results = filter(not_empty, local_values)
         
     return filter_results
-def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_toggle, offset_int, count_bool):
+def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_toggle, offset_int, count_bool, limit_num):
     def return_price_SQL(minFilter, maxFilter, exactPrice):
         local_minFilter = minFilter
         local_maxFilter = maxFilter
@@ -71,6 +71,7 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
     local_minFilter_price = minFilter_price
     local_maxFilter_price = maxFilter_price
     local_exactPrice_toggle = exactPrice_toggle
+    local_limit_num = limit_num
     try:
         local_offset_int = offset_int
     except:
@@ -130,7 +131,7 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
     if local_count_bool:
         search_SQL = baseRestaurantInfo_SQL + search_WHEREsql + ";"
     else:
-        search_SQL = baseRestaurantInfo_SQL + search_WHEREsql + f" LIMIT {local_offset_int},10;"
+        search_SQL = baseRestaurantInfo_SQL + search_WHEREsql + f" LIMIT {local_offset_int},{local_limit_num};"
     
     return search_SQL
 
@@ -344,6 +345,7 @@ def restaurant_browser():
     paginationFavorites_radio = request.args.get("pagination-favorites")
     paginationRecommendations_radio = request.args.get("pagination-recommendations")
 
+    limit = 1
 
     try:
         selected_paginationSearchs = int(request.args.get("selected-page-searchs"))
@@ -366,15 +368,15 @@ def restaurant_browser():
                     Restaurant.id = FavoriteRestaurants.restaurant_id AND FavoriteRestaurants.user_id = {currentUser_id};
     """)
     fav_rec_count = cursor.fetchone()
-    max_paginationFavorites = ceil(fav_rec_count["favNum"] / 10)
-    max_paginationRecommendations = ceil(fav_rec_count["allNum"] / 10)
+    max_paginationFavorites = ceil(fav_rec_count["favNum"] / limit)
+    max_paginationRecommendations = ceil(fav_rec_count["allNum"] / limit)
 
     if query or dietaryRestriction_id or minFilter_price or maxFilter_price:
         searchOffset_int = 0
-        searchCOUNT_SQL = return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_radioToggle, searchOffset_int, True)
+        searchCOUNT_SQL = return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_radioToggle, searchOffset_int, True, limit)
         cursor.execute(searchCOUNT_SQL)
         searchCOUNT_resultRaw = cursor.fetchone()
-        max_paginationSearchs = ceil(searchCOUNT_resultRaw["searchAll"] / 10)
+        max_paginationSearchs = ceil(searchCOUNT_resultRaw["searchAll"] / limit)
 
         if max_paginationSearchs < 1:
             max_paginationSearchs = 1
@@ -396,14 +398,14 @@ def restaurant_browser():
     current_paginationFavorites_int = return_currentPage(paginationFavorites_radio, max_paginationFavorites, selected_paginationFavorites)
     current_paginationRecommendations_int = return_currentPage(paginationRecommendations_radio, max_paginationRecommendations, selected_paginationRecommendations)
 
-    searchOffset_int = 10 * (current_paginationSearchs_int - 1)
-    favoriteOffset_int = 10 * (current_paginationFavorites_int - 1)
-    recommendationOffset_int = 10 * (current_paginationRecommendations_int - 1)
+    searchOffset_int = limit * (current_paginationSearchs_int - 1)
+    favoriteOffset_int = limit * (current_paginationFavorites_int - 1)
+    recommendationOffset_int = limit * (current_paginationRecommendations_int - 1)
 
 
 
     if query or dietaryRestriction_id or minFilter_price or maxFilter_price:
-        search_SQL = return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_radioToggle, searchOffset_int, False)
+        search_SQL = return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_price, maxFilter_price, exactPrice_radioToggle, searchOffset_int, False, limit)
         cursor.execute(search_SQL)
         search_results = cursor.fetchall()
     else:
@@ -423,7 +425,7 @@ def restaurant_browser():
                 JOIN FavoriteRestaurants 
                     ON Restaurant.id = FavoriteRestaurants.restaurant_id 
                         AND FavoriteRestaurants.user_id = {currentUser_id}
-                LIMIT {favoriteOffset_int}, 10;
+                LIMIT {favoriteOffset_int}, {limit};
                 """)
     favorite_results  = cursor.fetchall()
     # Recommendation
@@ -436,7 +438,7 @@ def restaurant_browser():
                     max_cost, 
                     image 
                 FROM Restaurant 
-                LIMIT {recommendationOffset_int}, 10;
+                LIMIT {recommendationOffset_int}, {limit};
                 """)
     recommendation_results = cursor.fetchall()
 
