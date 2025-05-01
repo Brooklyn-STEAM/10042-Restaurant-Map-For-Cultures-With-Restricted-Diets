@@ -18,55 +18,32 @@
       height: 500px;
       width: 1600px;
     }
+
+    body {
+      background-image: url('/static/background.png');
+    }
   </style>
 </head>
 
-<body class="body">
+<body class="body text-white ">
   {% include "components/navbar.html.jinja" %}
 
 
 
-
-
-  <main class="container">
-
-    <div class="  mb-4 rounded text-body-emphasis bg-body-secondary position-relative">
-      <img src="/static/images/homepage2.png" class="img-fluid" id="picture">
-      <div class="position-absolute bottom-0">
-        <h1 class="display-4 fst-italic ibm-plex-serif-bold">Dish Map</h1>
-        <p class="lead my-3">discover dishes that connect with you</p>
-        <p class="lead mb-0"><a href="#" class="text-body-emphasis fw-bold">Continue reading...</a></p>
-      </div>
+  <div class="wrapper">
+    <div class="typing-demo">
+      Welocme to Dish Map , where dishes connect with you 
+      
     </div>
+</div>
 
 
-    <div class="row mb-2">
-      <div class="colum-md-6">
-        <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
-          <div class="col p-4 d-flex flex-column position-static">
-            <img src="/static/images/Untitled (3).png" alt="Logo" width="150" class="d-inline-block align-text-top">
-            <h3 class="mb-0">LA SOVA</h3>
-            <div class="mb-1 text-body-secondary">Nov 11</div>
-            <p class="mb-auto">Gourmet kosher take-out and catering establishment supplying comfort food and quick bites
-            </p>
-            <a href="#" class="icon-link gap-1 icon-link-hover stretched-link">
-              Continue reading
-              <svg class="bi">
-                <use xlink:href="#chevron-right"></use>
-              </svg>
-            </a>
-          </div>
-          <div class="col-2 d-none d-lg-block">
-            <img class="img-fluid" src="/static/images/restaurants/la_sova_image.jpg">
-          </div>
-        </div>
-        <div class="col-md-8">
-        <div class="row">
-         <div class="col-sm-6 col-md-4">
-          <img class="img-fluid" src="/static/images/restaurants/la_sova_image.jpg">
-          </div>
-        
-        </div>
+
+
+
+
+
+       <div class="conatainer">
           <h3 class="pb-4 mb-4 fst-italic border-bottom">
             from the dishmap onwers
           </h3>
