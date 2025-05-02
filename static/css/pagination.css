@@ -1,0 +1,99 @@
+.BW-nav-browser-pagination{
+    height: 100%;
+    width: 6%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+
+
+    & > .BW-ul-pagination-vertical{
+        list-style: none;
+
+        width: 100%;
+
+        padding: 0px;
+        margin: 0px;
+
+        & > *{
+            &:hover{
+                background-color: lightblue;
+            }
+        }
+        & > .BW-li-pagination-item{
+            width: 100%;
+            aspect-ratio: 1 / 1;
+
+            border: 2px solid black;
+            overflow: hidden;
+
+
+
+            & > label{
+                width: 100%;
+                height: 100%;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+
+                & > *{
+                    margin: 0px;
+                    padding: 0px;
+                }
+                & > input[type = "radio"]{
+                    display: none;
+                }
+
+                &:has(input:checked){
+                    background-color: aqua;
+                }
+            }
+
+            &.BW-pagination-back{
+                border-radius: 10px 10px 0px 0px;
+            }
+            &.BW-pagination-min{
+
+                
+            }
+            &.BW-pagination-current{
+                & input[type="number"] input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+
+
+                }
+                & > label > input[type="number"]{
+                    width: 100%;
+                    height: 100%;
+
+                    text-align: center;
+                    border: none;
+
+                    background-color: transparent;
+
+                }
+                  
+            }
+            &.BW-pagination-max{
+
+            }
+            &.BW-pagination-forward{
+                border-radius: 0px 0px 10px 10px;
+            }
+
+
+        }
+    }
+    .BW-button-pagination-turnPage{
+        width: 100%;
+        aspect-ratio: 1 / 1;
+
+        object-fit: contain;
+    }
+}
