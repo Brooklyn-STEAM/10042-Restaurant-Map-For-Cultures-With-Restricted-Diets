@@ -1,29 +1,27 @@
 <nav class="BW-nav-browser-pagination">
     <ul class="BW-ul-pagination-vertical">
         <li class="BW-li-pagination-item BW-pagination-back">
-            <button class="BW-button-pagination-turnPage" type="submit" name="pagination-{{ group }}" value="back" form="searchBar_form">
+            <button class="BW-input-pagination-turnPage BW-pagination-turnPage-'group'" type="submit" value="{{ current_page - 1}}" form="searchBar_form" onclick="name_ifFocused(group)">
                 <img src="/static/images/svgs/doubleArrow_up.svg">
             </button>
         </li>
         <li class="BW-li-pagination-item BW-pagination-min">
-            <button class="BW-button-pagination-turnPage" type="submit" name="pagination-{{ group }}" value="min" form="searchBar_form">
+            <button class="BW-input-pagination-turnPage BW-pagination-turnPage-'group'" type="submit" value="1" form="searchBar_form" onclick="name_ifFocused(group)">
                 <p>1</p>
             </button>
         </li>
 
         <li class="BW-li-pagination-item BW-pagination-current">
-            <input class="BW-number-pagination-turnPage" type="number" id="number-pagination-current-{{ group }}" 
-            name="selected-page-{{ group }}" value="{{ current_page }}" 
-            onfocus="check_currentPagination('{{ group }}')" form="searchBar_form">
+            <input class="BW-input-pagination-turnPage BW-pagination-turnPage-'group'" type="number" value="{{ current_page }}" form="searchBar_form" onclick="name_ifFocused(group)">
         </li>
 
         <li class="BW-li-pagination-item BW-pagination-max">
-            <button class="BW-button-pagination-turnPage" type="radio" id="radio-pagination-max-{{ group }}" name="pagination-{{ group }}" value="max" form="searchBar_form">
+            <button class="BW-input-pagination-turnPage BW-pagination-turnPage-'group'" type="submit" value="{{ max_page }}" form="searchBar_form" onclick="name_ifFocused(group)">
                 <p>{{ max_page }}</p>
             </button>
         </li>
         <li class="BW-li-pagination-item BW-pagination-forward">
-            <button class="BW-button-pagination-turnPage" type="submit" name="pagination-{{ group }}" value="forward" form="searchBar_form">
+            <button class="BW-input-pagination-turnPage BW-pagination-turnPage-'group'" type="submit" name="pagination-'group'" value="{{ current_page + 1}}" form="searchBar_form" onclick="name_ifFocused(group)">
                 <img src="/static/images/svgs/doubleArrow_down.svg">
             </button>
         </li>

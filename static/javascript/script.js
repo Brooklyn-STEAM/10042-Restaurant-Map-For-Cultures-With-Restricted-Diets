@@ -32,3 +32,11 @@ function check_currentPagination(group) {
 
     pagination_radio.checked = true
 }
+
+function name_ifFocused(group){
+    const focusedPaginationInput = this
+    focusedPaginationInput_siblings = document.getElementsByClassName("BW-pagination-turnPage-" + group)
+
+    focusedPaginationInput_siblings.name = ""
+    focusedPaginationInput.name = "pagination-" + group
+}

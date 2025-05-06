@@ -135,32 +135,27 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
     
     return search_SQL
 
-def return_currentPage(radio_value, maxPage_number, selectedPage_number):
-    local_radio_value = radio_value
+def return_currentPage(pagination_value, maxPage_number):
+    local_pagination_value = pagination_value
     local_maxPage_number = maxPage_number
-    local_selectedPage_number =  selectedPage_number
 
-    if local_radio_value == "back":
-        currentPage = local_selectedPage_number - 1
-        if currentPage <= 0:
-            currentPage = 1
-    elif local_radio_value == "min":
-        currentPage = 1
-    elif local_radio_value == "current":
-        currentPage = local_selectedPage_number
-    elif local_radio_value == "max":
+    try:
+        local_pagination_value = int(local_pagination_value)
+    except:
+        local_pagination_value =  1
+
+    if local_pagination_value > local_maxPage_number:
         currentPage = local_maxPage_number
-    elif local_radio_value == "forward":
-        currentPage = local_selectedPage_number + 1
-        if currentPage > local_maxPage_number:
-            currentPage = local_maxPage_number
-    else:
+    elif local_pagination_value < 1:
         currentPage = 1
-    
+    else:
+        currentPage = local_pagination_value
+    print("iki")
+    print(local_pagination_value)
     return currentPage
 
 
-from flask import Flask, render_template, request, redirect, flash, abort
+from flask import Flask, render_template, request, redirect, flash
 import pymysql
 from dynaconf import Dynaconf
 import flask_login
@@ -341,26 +336,11 @@ def restaurant_browser():
     maxFilter_price = request.args.get('price_max_filter')
     exactPrice_radioToggle = request.args.get("exact_price_toggle")
 
-    paginationSearchs_radio = request.args.get("pagination-searchs")
-    paginationFavorites_radio = request.args.get("pagination-favorites")
-    paginationRecommendations_radio = request.args.get("pagination-recommendations")
+    paginationSearchs_value = request.args.get("pagination-searchs")
+    paginationFavorites_value = request.args.get("pagination-favorites")
+    paginationRecommendations_value = request.args.get("pagination-recommendations")
 
-    limit = 10
-
-    try:
-        selected_paginationSearchs = int(request.args.get("selected-page-searchs"))
-    except:
-        selected_paginationSearchs = 1
-
-    try:
-        selected_paginationFavorites = int(request.args.get("selected-page-favorites"))
-    except:
-        selected_paginationFavorites = 1
-
-    try:
-        selected_paginationRecommendations = int(request.args.get("selected-page-recommendations"))
-    except:
-        selected_paginationRecommendations = 1
+    limit = 1
 
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant
@@ -384,19 +364,10 @@ def restaurant_browser():
     else:
         max_paginationSearchs = 1
 
-    # maxPagination_list = [max_paginationSearchs, max_paginationFavorites, max_paginationRecommendations]
-    # for maxPagination in maxPagination_list:
-    #     if maxPagination < 1:
-    #         maxPagination = 1
 
-
-    try:
-        current_paginationSearchs_int = return_currentPage(paginationSearchs_radio, max_paginationSearchs, selected_paginationSearchs)
-    except:
-        current_paginationSearchs_int = 1
-
-    current_paginationFavorites_int = return_currentPage(paginationFavorites_radio, max_paginationFavorites, selected_paginationFavorites)
-    current_paginationRecommendations_int = return_currentPage(paginationRecommendations_radio, max_paginationRecommendations, selected_paginationRecommendations)
+    current_paginationSearchs_int = return_currentPage(paginationSearchs_value, max_paginationSearchs)
+    current_paginationFavorites_int = return_currentPage(paginationFavorites_value, max_paginationFavorites)
+    current_paginationRecommendations_int = return_currentPage(paginationRecommendations_value, max_paginationRecommendations)
 
     searchOffset_int = limit * (current_paginationSearchs_int - 1)
     favoriteOffset_int = limit * (current_paginationFavorites_int - 1)
