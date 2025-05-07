@@ -150,8 +150,6 @@ def return_currentPage(pagination_value, maxPage_number):
         currentPage = 1
     else:
         currentPage = local_pagination_value
-    print("iki")
-    print(local_pagination_value)
     return currentPage
 
 
@@ -339,6 +337,11 @@ def restaurant_browser():
     paginationSearchs_value = request.args.get("pagination-searchs")
     paginationFavorites_value = request.args.get("pagination-favorites")
     paginationRecommendations_value = request.args.get("pagination-recommendations")
+
+    print("pp")
+    print(paginationSearchs_value)
+    print(paginationFavorites_value)
+    print(paginationRecommendations_value)
 
     limit = 1
 
