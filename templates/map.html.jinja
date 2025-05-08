@@ -17,6 +17,15 @@
           <link rel="stylesheet" href="/static/css/map.css">
           <link rel="stylesheet" href="/static/css/style.css">
      </section>
+    {% set search_input =  
+                    request.args.get('query') 
+                    or 
+                    request.args.get('dietary_restriction_radio') 
+                    or
+                    request.args.get('price_min_filter') 
+                    or 
+                    request.args.get('price_max_filter') 
+    %} {# let the browser know if there was a search #}
 </head>
 <body class="body-map-page">
 
@@ -39,7 +48,7 @@
                     </button>
                </header>
 
-               <div id="accordion-miniBrowser" class="accordion-collapse collapse show">
+               <div id="accordion-miniBrowser" class="accordion-collapse collapse {% if search_input %}show{% endif %}">
                     {% include "components/browser_body.html.jinja" %}
                </div>
 

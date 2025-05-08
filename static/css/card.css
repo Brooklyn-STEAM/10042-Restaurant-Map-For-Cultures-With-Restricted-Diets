@@ -15,7 +15,7 @@
         display: inline-block;
 
         flex-shrink: 0;
-        height: 100%; 
+        height: 100%;
         aspect-ratio: 1 / 2;
 
         background-color: rgb(161, 206, 235);

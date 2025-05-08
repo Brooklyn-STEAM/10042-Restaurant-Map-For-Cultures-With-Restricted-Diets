@@ -1,12 +1,3 @@
-{% set search_input =  
-                request.args.get('query') 
-                or 
-                request.args.get('dietary_restriction_radio') 
-                or
-                request.args.get('price_min_filter') 
-                or 
-                request.args.get('price_max_filter') 
-%}
 <section class="section-browser-body">
     <section class="section-browser-searchs">
         {% if search_results %}

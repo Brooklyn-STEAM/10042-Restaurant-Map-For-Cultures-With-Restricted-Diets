@@ -338,11 +338,6 @@ def restaurant_browser():
     paginationFavorites_value = request.args.get("pagination-favorites")
     paginationRecommendations_value = request.args.get("pagination-recommendations")
 
-    print("pp")
-    print(paginationSearchs_value)
-    print(paginationFavorites_value)
-    print(paginationRecommendations_value)
-
     limit = 1
 
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
@@ -610,26 +605,11 @@ def map_page():
     maxFilter_price = request.args.get('price_max_filter')
     exactPrice_radioToggle = request.args.get("exact_price_toggle")
 
-    paginationSearchs_radio = request.args.get("pagination-searchs")
-    paginationFavorites_radio = request.args.get("pagination-favorites")
-    paginationRecommendations_radio = request.args.get("pagination-recommendations")
+    paginationSearchs_value = request.args.get("pagination-searchs")
+    paginationFavorites_value = request.args.get("pagination-favorites")
+    paginationRecommendations_value = request.args.get("pagination-recommendations")
 
-    limit = 10
-
-    try:
-        selected_paginationSearchs = int(request.args.get("selected-page-searchs"))
-    except:
-        selected_paginationSearchs = 1
-
-    try:
-        selected_paginationFavorites = int(request.args.get("selected-page-favorites"))
-    except:
-        selected_paginationFavorites = 1
-
-    try:
-        selected_paginationRecommendations = int(request.args.get("selected-page-recommendations"))
-    except:
-        selected_paginationRecommendations = 1
+    limit = 1
 
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant
@@ -653,19 +633,10 @@ def map_page():
     else:
         max_paginationSearchs = 1
 
-    # maxPagination_list = [max_paginationSearchs, max_paginationFavorites, max_paginationRecommendations]
-    # for maxPagination in maxPagination_list:
-    #     if maxPagination < 1:
-    #         maxPagination = 1
 
-
-    try:
-        current_paginationSearchs_int = return_currentPage(paginationSearchs_radio, max_paginationSearchs, selected_paginationSearchs)
-    except:
-        current_paginationSearchs_int = 1
-
-    current_paginationFavorites_int = return_currentPage(paginationFavorites_radio, max_paginationFavorites, selected_paginationFavorites)
-    current_paginationRecommendations_int = return_currentPage(paginationRecommendations_radio, max_paginationRecommendations, selected_paginationRecommendations)
+    current_paginationSearchs_int = return_currentPage(paginationSearchs_value, max_paginationSearchs)
+    current_paginationFavorites_int = return_currentPage(paginationFavorites_value, max_paginationFavorites)
+    current_paginationRecommendations_int = return_currentPage(paginationRecommendations_value, max_paginationRecommendations)
 
     searchOffset_int = limit * (current_paginationSearchs_int - 1)
     favoriteOffset_int = limit * (current_paginationFavorites_int - 1)

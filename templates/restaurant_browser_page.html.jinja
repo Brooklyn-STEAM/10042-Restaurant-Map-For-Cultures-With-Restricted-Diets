@@ -13,7 +13,15 @@
         <link rel="stylesheet" href="/static/css/pagination.css">
         <link rel="stylesheet" href="/static/css/style.css">
     </section>
-
+    {% set search_input =  
+                    request.args.get('query') 
+                    or 
+                    request.args.get('dietary_restriction_radio') 
+                    or
+                    request.args.get('price_min_filter') 
+                    or 
+                    request.args.get('price_max_filter') 
+    %} {# let the browser know if there was a search #}
 </head>
 <body class="body-restaurantBrowser-page">
     <header class="header-nav-container">

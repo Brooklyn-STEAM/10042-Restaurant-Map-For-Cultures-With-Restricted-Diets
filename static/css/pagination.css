@@ -58,10 +58,10 @@
             }
 
 
-            &.BW-pagination-back{
+            &.BW-pagination-min{
                 border-bottom: 2px solid black;
             }
-            &.BW-pagination-min{
+            &.BW-pagination-back{
                 border-bottom: 2px solid black;
             }
             &.BW-pagination-current{
@@ -73,10 +73,10 @@
                     -webkit-appearance: none;
                 }
             }
-            &.BW-pagination-max{
+            &.BW-pagination-forward{
                 border-bottom: 2px solid black;
             }
-            &.BW-pagination-forward{
+            &.BW-pagination-max{
             }
 
 
