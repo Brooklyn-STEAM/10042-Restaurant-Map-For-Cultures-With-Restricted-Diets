@@ -338,7 +338,7 @@ def restaurant_browser():
     paginationFavorites_value = request.args.get("pagination-favorites")
     paginationRecommendations_value = request.args.get("pagination-recommendations")
 
-    limit = 1
+    limit = 10
 
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant
@@ -609,7 +609,7 @@ def map_page():
     paginationFavorites_value = request.args.get("pagination-favorites")
     paginationRecommendations_value = request.args.get("pagination-recommendations")
 
-    limit = 1
+    limit = 10
 
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant

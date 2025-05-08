@@ -17,7 +17,7 @@
           <link rel="stylesheet" href="/static/css/map.css">
           <link rel="stylesheet" href="/static/css/style.css">
      </section>
-    {% set search_input =  
+     {% set search_input =  
                     request.args.get('query') 
                     or 
                     request.args.get('dietary_restriction_radio') 
@@ -25,7 +25,22 @@
                     request.args.get('price_min_filter') 
                     or 
                     request.args.get('price_max_filter') 
-    %} {# let the browser know if there was a search #}
+     %} {# let the browser know if there was a search #}
+     {% if search_input %}
+          {% set paginationInput_boolean =
+                                        request.args.get('pagination-searchs')|int > 1
+                                        or
+                                        request.args.get('pagination-favorites')|int > 1
+                                        or
+                                        request.args.get('pagination-recommendations')|int > 1
+          %}
+     {% else %}
+          {% set paginationInput_boolean =
+                                        request.args.get('pagination-favorites')|int > 1
+                                        or
+                                        request.args.get('pagination-recommendations')|int > 1
+          %}
+     {% endif %}
 </head>
 <body class="body-map-page">
 
@@ -48,7 +63,7 @@
                     </button>
                </header>
 
-               <div id="accordion-miniBrowser" class="accordion-collapse collapse {% if search_input %}show{% endif %}">
+               <div id="accordion-miniBrowser" class="accordion-collapse collapse {% if search_input or paginationInput_boolean %}show{% endif %}">
                     {% include "components/browser_body.html.jinja" %}
                </div>
 
