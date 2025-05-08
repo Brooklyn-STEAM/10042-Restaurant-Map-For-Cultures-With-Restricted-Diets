@@ -1,4 +1,4 @@
-<form name="search_bar_form" action="{{ current_route }}" class="container" style="background-color: white;">
+<form id="searchBar_form" name="search_bar_form" action="{{ current_route }}" class="container" style="background-color: white;">
     <section class="input-group {% if current_route == '/restaurant_browser' %}mb-3{% endif %}">
         <input id="restaurantBrowserSearchBar" type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search..." value="{{ request.args.get('query', '') }}">
         <input class="btn btn-outline-secondary" onclick="clearSearchBar()" type="button" value="X">

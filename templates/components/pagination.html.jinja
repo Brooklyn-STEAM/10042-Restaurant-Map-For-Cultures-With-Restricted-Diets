@@ -1,0 +1,31 @@
+<nav class="BW-nav-browser-pagination">
+    <ul class="BW-ul-pagination-vertical">
+        <li class="BW-li-pagination-item BW-pagination-min">
+            <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination(1, '{{ group }}-turnPage-current')">
+                <p>1</p>
+            </button>
+        </li>
+        <li class="BW-li-pagination-item BW-pagination-back">
+            <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination({{ current_page - 1 }}, '{{ group }}-turnPage-current')">
+                <img src="/static/images/svgs/doubleArrow_up.svg">
+            </button>
+        </li>
+
+
+        <li class="BW-li-pagination-item BW-pagination-current">
+            <input id="{{ group }}-turnPage-current" class="BW-input-pagination-turnPage" type="number" value="{{ current_page }}" 
+            name="pagination-{{ group }}" form="searchBar_form">
+        </li>
+
+        <li class="BW-li-pagination-item BW-pagination-forward">
+            <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination({{ current_page + 1 }}, '{{ group }}-turnPage-current')">
+                <img src="/static/images/svgs/doubleArrow_down.svg">
+            </button>
+        </li>
+        <li class="BW-li-pagination-item BW-pagination-max">
+            <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination({{ max_page }}, '{{ group }}-turnPage-current')">
+                <p>{{ max_page }}</p>
+            </button>
+        </li>
+    </ul>
+</nav>

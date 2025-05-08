@@ -25,3 +25,21 @@ function clearAllFilters() {
     clearCulturalDietaryRestrictionRadio()
     clearPriceFilterSettings()
 }
+
+function check_currentPagination(group) {
+    const paginationRadio_id = "radio-pagination-current-" + group
+    const pagination_radio = document.getElementById(paginationRadio_id)
+
+    pagination_radio.checked = true
+}
+
+function turn_currentPagination(target_page_int, input_id) {
+    const local_target_page_int = target_page_int
+    const local_input_id = input_id
+    const input_element = document.getElementById(local_input_id)
+    const searchForm_element = document.getElementById("searchBar_form") 
+
+    input_element.value = local_target_page_int
+
+    searchForm_element.submit()
+}

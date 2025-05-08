@@ -12,10 +12,35 @@
           <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
                integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
+          <link rel="stylesheet" href="/static/css/card.css">
+          <link rel="stylesheet" href="/static/css/pagination.css">
           <link rel="stylesheet" href="/static/css/map.css">
           <link rel="stylesheet" href="/static/css/style.css">
-          <link rel="stylesheet" href="/static/css/card.css">
      </section>
+     {% set search_input =  
+                    request.args.get('query') 
+                    or 
+                    request.args.get('dietary_restriction_radio') 
+                    or
+                    request.args.get('price_min_filter') 
+                    or 
+                    request.args.get('price_max_filter') 
+     %} {# let the browser know if there was a search #}
+     {% if search_input %}
+          {% set paginationInput_boolean =
+                                        request.args.get('pagination-searchs')|int > 1
+                                        or
+                                        request.args.get('pagination-favorites')|int > 1
+                                        or
+                                        request.args.get('pagination-recommendations')|int > 1
+          %}
+     {% else %}
+          {% set paginationInput_boolean =
+                                        request.args.get('pagination-favorites')|int > 1
+                                        or
+                                        request.args.get('pagination-recommendations')|int > 1
+          %}
+     {% endif %}
 </head>
 <body class="body-map-page">
 
@@ -38,7 +63,7 @@
                     </button>
                </header>
 
-               <div id="accordion-miniBrowser" class="accordion-collapse collapse show">
+               <div id="accordion-miniBrowser" class="accordion-collapse collapse {% if search_input or paginationInput_boolean %}show{% endif %}">
                     {% include "components/browser_body.html.jinja" %}
                </div>
 
@@ -47,10 +72,6 @@
           <div id="map"></div>
      
      </main>
-          
-     <footer>
-     
-     </footer>
 
 
      <section id="JavaScript-primaryRepository">
