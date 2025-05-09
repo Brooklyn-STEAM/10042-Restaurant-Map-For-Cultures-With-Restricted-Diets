@@ -43,3 +43,34 @@ function turn_currentPagination(target_page_int, input_id) {
 
     searchForm_element.submit()
 }
+
+async function change_accordionToggleIcon(accordionToggle_id, accordionToggleIcon_id){
+    const local_accordionToggleIcon_id = accordionToggleIcon_id;
+    const local_accordionToggle_id = accordionToggle_id
+
+    const accordionToggleIcon_element = document.getElementById(local_accordionToggleIcon_id);
+    const current_accordionToggleIcon_url = new URL(accordionToggleIcon_element.src).pathname;
+    
+    if (current_accordionToggleIcon_url == "/static/images/svgs/arrow_down.svg") {
+        accordionToggleIcon_element.src = "/static/images/svgs/arrow_up.svg";
+    }
+    else {
+        accordionToggleIcon_element.src = "/static/images/svgs/arrow_down.svg";
+    }
+
+    await delay(1000); // Wait for 1 second
+
+    const accordionToggle_element = document.getElementById(local_accordionToggle_id);
+    const accordionToggle_class = accordionToggle_element.classList
+
+    if (accordionToggle_class.contains("collapsed")) {
+        accordionToggleIcon_element.src = "/static/images/svgs/arrow_down.svg";
+    }
+    else {
+        accordionToggleIcon_element.src = "/static/images/svgs/arrow_up.svg";
+    }
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
