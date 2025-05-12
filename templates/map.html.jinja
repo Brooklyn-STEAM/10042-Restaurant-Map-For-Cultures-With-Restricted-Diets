@@ -56,10 +56,8 @@
                     {% with current_route = "/map"%}
                          {% include "components/search_bar.html.jinja" %}
                     {% endwith %}
-                    <button id="accordion-miniBrowser-toogleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-miniBrowser" aria-expanded="true" aria-controls="collapseOne">
-                         <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
-                              <path d="M14 5l-6.5 7L1 5" stroke="currentColor" stroke-linecap="square"></path>
-                         </svg>                         
+                    <button id="accordion-miniBrowser-toogleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-miniBrowser" aria-expanded="true" aria-controls="collapseOne" onclick="change_accordionToggleIcon('accordion-miniBrowser-toogleBtn', 'miniBroswerAccordionToggleIcon_id')">
+                         <img id="miniBroswerAccordionToggleIcon_id" src="/static/images/svgs/arrow_down.svg">                       
                     </button>
                </header>
 
