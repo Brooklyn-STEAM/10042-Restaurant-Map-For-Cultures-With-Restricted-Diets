@@ -26,15 +26,21 @@
             </article>
             
             
-            <form id="form-customerService" class="container-contactForm col">
+            <form id="form-customerService" class="container-contactForm col" action="/contact" method="POST">
                 <h2 class="text-center">Email</h2>
 
                 {# To #}
                 <section class="mb-3">
-                    <label for="text-formCStitle" class="form-label">
+                    <label for="text-formCSto" class="form-label">
                         To
                     </label>
-                    <input type="text" class="form-control" id="text-formCStitle">
+                    <select class="form-select" name="to" aria-label="Default select example" required>
+                        <option value="0" selected>DishMap</option>
+                        {# Restaurant Options #}
+                        {% for receiverOption in receiverOptions_list %}
+                            <option value="{{ receiverOption['id'] }}">{{ receiverOption["name"] }}</option>
+                        {% endfor %}
+                    </select>
                 </section>
 
                 {# Title #}
@@ -42,7 +48,7 @@
                     <label for="text-formCStitle" class="form-label">
                         Title
                     </label>
-                    <input type="text" class="form-control" id="text-formCStitle">
+                    <input type="text" class="form-control" id="text-formCStitle" name="title" required>
                 </section>
                 
                 {# Message #}
@@ -50,7 +56,8 @@
                     <label for="textarea-formCSmessage" class="form-label">
                         Message
                     </label>
-                    <textarea class="form-control" id="textarea-formCSmessage" rows="3" placeholder="Give as much detail as you can so we can understand your issue."></textarea>
+                    <textarea class="form-control" id="textarea-formCSmessage" rows="3" placeholder="Give as much detail as you can so we can understand your issue."
+                    name="message" required></textarea>
                 </section>
 
                 {# Contact #}
@@ -58,34 +65,34 @@
                     <label for="text-formCStitle" class="form-label">
                         Your Email
                     </label>
-                    <input type="email" class="form-control" id="text-formCStitle">
+                    <input type="email" class="form-control" id="text-formCStitle" name="sender_email">
 
                     <label for="text-formCStitle" class="form-label">
                         Your Phone Number
                     </label>
-                    <input type="tel" class="form-control" id="text-formCStitle">
+                    <input type="tel" class="form-control" id="text-formCStitle" name="sender_phoneNumber">
 
                     <label for="text-formCStitle" class="form-label">
                         Your Address
                     </label>
-                    <input type="text" class="form-control" id="text-formCStitle">
+                    <input type="text" class="form-control" id="text-formCStitle" name="sender_address">
                     
                     <br>
 
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="basic-addon1">City</span>
-                        <input type="text" class="form-control">
+                        <input type="text" class="form-control" name="sender_address_city">
 
                         <span class="input-group-text" id="basic-addon1">State</span>
-                        <input type="text" class="form-control">
+                        <input type="text" class="form-control" name="sender_address_state">
                     </div>
 
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="basic-addon1">Country</span>
-                        <input type="text" class="form-control">
+                        <input type="text" class="form-control" name="sender_address_country">
 
                         <span class="input-group-text" id="basic-addon1">Zip Code</span>
-                        <input type="text" class="form-control">
+                        <input type="text" class="form-control" name="sender_address_zipCode">
                     </div>
 
                 </section>

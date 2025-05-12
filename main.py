@@ -61,7 +61,7 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
                                                 """
         dietaryRestriction_WHEREsql = f"(RestaurantDietaryRestriction.dietary_restriction_id = {local_dietaryRestriction_id})"
 
-        dietaryRestriction_SQL = RestaurantDietaryRestriction_JOINsql + " WHERE " + dietaryRestriction_WHEREsql
+        dietaryRestriction_SQL = RestaurantDietaryRestriction_JOINsql + "  WHERE Restaurant.id != 0 AND " + dietaryRestriction_WHEREsql
 
         return dietaryRestriction_SQL
     
@@ -125,7 +125,7 @@ def return_searchSQL(currentUser_id, query, dietaryRestriction_id, minFilter_pri
     if local_dietaryRestriction_id:
         search_WHEREsql = " AND ".join(empty_value_filter(search_sqlParts))
     else:
-        search_WHEREsql = " WHERE" + " AND ".join(empty_value_filter(search_sqlParts))
+        search_WHEREsql = " WHERE Restaurant.id != 0 AND" + " AND ".join(empty_value_filter(search_sqlParts))
         
 
     if local_count_bool:
@@ -338,12 +338,13 @@ def restaurant_browser():
     paginationFavorites_value = request.args.get("pagination-favorites")
     paginationRecommendations_value = request.args.get("pagination-recommendations")
 
-    limit = 10
+    limit = 1
 
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant
                 LEFT JOIN FavoriteRestaurants ON 
-                    Restaurant.id = FavoriteRestaurants.restaurant_id AND FavoriteRestaurants.user_id = {currentUser_id};
+                    Restaurant.id = FavoriteRestaurants.restaurant_id AND FavoriteRestaurants.user_id = {currentUser_id}
+                WHERE Restaurant.id != 0;
     """)
     fav_rec_count = cursor.fetchone()
     max_paginationFavorites = ceil(fav_rec_count["favNum"] / limit)
@@ -394,6 +395,7 @@ def restaurant_browser():
                 JOIN FavoriteRestaurants 
                     ON Restaurant.id = FavoriteRestaurants.restaurant_id 
                         AND FavoriteRestaurants.user_id = {currentUser_id}
+                WHERE Restaurant.id != 0
                 LIMIT {favoriteOffset_int}, {limit};
                 """)
     favorite_results  = cursor.fetchall()
@@ -407,6 +409,7 @@ def restaurant_browser():
                     max_cost, 
                     image 
                 FROM Restaurant 
+                WHERE Restaurant.id != 0
                 LIMIT {recommendationOffset_int}, {limit};
                 """)
     recommendation_results = cursor.fetchall()
@@ -614,7 +617,8 @@ def map_page():
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant
                 LEFT JOIN FavoriteRestaurants ON 
-                    Restaurant.id = FavoriteRestaurants.restaurant_id AND FavoriteRestaurants.user_id = {currentUser_id};
+                    Restaurant.id = FavoriteRestaurants.restaurant_id AND FavoriteRestaurants.user_id = {currentUser_id}
+                WHERE Restaurant.id != 0;
     """)
     fav_rec_count = cursor.fetchone()
     max_paginationFavorites = ceil(fav_rec_count["favNum"] / limit)
@@ -665,6 +669,7 @@ def map_page():
                 JOIN FavoriteRestaurants 
                     ON Restaurant.id = FavoriteRestaurants.restaurant_id 
                         AND FavoriteRestaurants.user_id = {currentUser_id}
+                WHERE Restaurant.id != 0
                 LIMIT {favoriteOffset_int}, {limit};
                 """)
     favorite_results  = cursor.fetchall()
@@ -678,6 +683,7 @@ def map_page():
                     max_cost, 
                     image 
                 FROM Restaurant 
+                WHERE Restaurant.id != 0
                 LIMIT {recommendationOffset_int}, {limit};
                 """)
     recommendation_results = cursor.fetchall()
@@ -709,7 +715,46 @@ def map_page():
 
 @app.route("/contact" , methods=["POST", "GET"])
 def contact_page():
-    return render_template("contact_page.html.jinja")
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    currentUser_id = flask_login.current_user.id
+
+    if request.method == "POST":
+        local_receiver_id = request.form["to"]
+        local_title = request.form["title"]
+        local_message = request.form["message"]
+        # Contacts
+        local_sender_email = request.form["sender_email"]
+        local_sender_phoneNumber = request.form["sender_phoneNumber"]
+        local_sender_address = request.form["sender_address"]
+        local_sender_address_city = request.form["sender_address_city"]
+        local_sender_address_state = request.form["sender_address_state"]
+        local_sender_address_country = request.form["sender_address_country"]
+        local_sender_address_zipCode = request.form["sender_address_zipCode"]
+
+        cursor.execute(f"""
+            INSERT INTO `UserCSMessage` 
+                (`receiver_id`, `title`, `message`,
+                    `email`, `phone_number`, `address`, `city`, `state`, `country`, `zip_code`, `sender_id`) 
+            VALUES 
+                ('{local_receiver_id}', '{local_title}', '{local_message}', 
+                    '{local_sender_email}', '{local_sender_phoneNumber}','{local_sender_address}','{local_sender_address_city}','{local_sender_address_state}','{local_sender_address_country}','{local_sender_address_zipCode}','{currentUser_id}')
+        """)
+
+
+    cursor.execute(f"""
+        SELECT 
+            `id`, `name`
+        FROM `Restaurant`;
+    """)
+    receiverData_list = cursor.fetchall()
+
+
+
+    cursor.close()
+    conn.close()
+    return render_template("contact_page.html.jinja", receiverOptions_list = receiverData_list)
 
 @app.route("/about_us" , methods=["POST", "GET"])
 def about_us_page():
