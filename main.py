@@ -695,7 +695,6 @@ def map_page():
 
     cursor.close()
     conn.close()
-
     return render_template("map.html.jinja", 
                             search_results = search_results, 
                             current_paginationSearchs_int = current_paginationSearchs_int,
@@ -733,15 +732,18 @@ def contact_page():
         local_sender_address_country = request.form["sender_address_country"]
         local_sender_address_zipCode = request.form["sender_address_zipCode"]
 
-        cursor.execute(f"""
-            INSERT INTO `UserCSMessage` 
-                (`receiver_id`, `title`, `message`,
-                    `email`, `phone_number`, `address`, `city`, `state`, `country`, `zip_code`, `sender_id`) 
-            VALUES 
-                ('{local_receiver_id}', '{local_title}', '{local_message}', 
-                    '{local_sender_email}', '{local_sender_phoneNumber}','{local_sender_address}','{local_sender_address_city}','{local_sender_address_state}','{local_sender_address_country}','{local_sender_address_zipCode}','{currentUser_id}')
-        """)
-
+        try:
+            cursor.execute(f"""
+                INSERT INTO `UserCSMessage` 
+                    (`receiver_id`, `title`, `message`,
+                        `email`, `phone_number`, `address`, `city`, `state`, `country`, `zip_code`, `sender_id`) 
+                VALUES 
+                    ('{local_receiver_id}', '{local_title}', '{local_message}', 
+                        '{local_sender_email}', '{local_sender_phoneNumber}','{local_sender_address}','{local_sender_address_city}','{local_sender_address_state}','{local_sender_address_country}','{local_sender_address_zipCode}','{currentUser_id}')
+            """)
+            flash("Thank you for your feedback", "success")
+        except:
+            flash("Sorry, something when wrong with your message", "error")
 
     cursor.execute(f"""
         SELECT 
@@ -749,7 +751,6 @@ def contact_page():
         FROM `Restaurant`;
     """)
     receiverData_list = cursor.fetchall()
-
 
 
     cursor.close()
