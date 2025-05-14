@@ -1,3 +1,206 @@
+devMode = {
+    "on": True
+}
+class Browser:
+    def __init__(self, current_user_id, request, limit):
+        self.current_user_id = current_user_id
+        self.request = request
+        self.limit = limit
+        self.current_route = self.request.path
+        self.userInputs = {
+            "has": False,
+            "searchFilters": {
+                "searchBar": self.request.args.get("query"),
+                "cultural_dietaryRestriction": self.request.args.get("dietary_restriction_radio"),
+                "min_price": self.request.args.get('price_min_filter'),
+                "max_price": self.request.args.get('price_max_filter'),
+                "exact_price": bool(self.requestrequest.args.get("exact_price_toggle"))
+            },
+            "pagination": {
+                "searches": self.request.args.get("pagination-searchs"), # fix spelling
+                "favorites": self.request.args.get("pagination-favorites"),
+                "recommendations": self.request.args.get("pagination-recommendations")
+            }
+        }
+
+        
+        for key in dict.keys(self.userInputs["searchFilters"]):
+            if self.userInputs["searchFilters"][key] and key != "exact_price":
+                self.userInputs["has"] = True
+
+    def __str__(self):
+        return self.request
+    
+    def generate_selectedColSQL(self, section, mode_count):
+        local_current_route = self.current_route
+
+        local_section = section
+        local_mode_count = mode_count
+        
+        if local_mode_count:
+            if local_section == "searches":
+                selectedCol_SQL = """
+                    COUNT(*) AS searchesResultRows_int
+                """
+            elif local_section == "allNfav":
+                selectedCol_SQL = """
+                    COUNT(FavoriteRestaurants.user_id = 1) AS allResultRows_int,
+                    COUNT(*) AS favoritesResultRows_int
+                """
+        else:
+            # normal
+            selectedCol_SQL = """
+                Restaurant.id as restaurant_id,
+                name, 
+                type,  
+                min_cost, 
+                max_cost, 
+                image, 
+                FavoriteRestaurants.id as favorite_restaurants_id,
+                FavoriteRestaurants.user_id 
+            """
+            # Mini Browser
+            if local_current_route == "/map":
+                mapCol_SQL = """
+                    lng,
+                    lat
+                """
+                selectedCol_SQL += mapCol_SQL
+
+        selectedColSQL = selectedCol_SQL
+        return selectedColSQL
+
+
+    def generate_selectSQL(self, section, mode_count):
+        local_section = section
+        local_mode_count = mode_count
+
+        selectedCol_SQL = self.generate_selectedColSQL(local_section, local_mode_count)
+
+        select_SQL = f"""
+            SELECT 
+                {selectedCol_SQL}
+            FROM Restaurant
+        """
+
+        selectSQL = select_SQL
+        return selectSQL
+    
+    def generate_joinSQL(self):
+        local_current_user_id = self.current_user_id
+        join_SQL = f"""
+            LEFT JOIN FavoriteRestaurants 
+                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                    AND FavoriteRestaurants.user_id = {local_current_user_id}
+        """
+
+        joinSQL = join_SQL
+        return joinSQL
+    
+    def generate_searchBarFilterSQL(self):
+        local_searchBar = self.userInputs["searchFilters"]["searchBar"]
+
+        searchBar_SQL = f"""(
+            (`name` LIKE '%{local_searchBar}%') 
+            OR 
+            (`address` LIKE '%{local_searchBar}%')
+            OR 
+            (`type` LIKE '%{local_searchBar}%') 
+            OR 
+            (`description` LIKE '%{local_searchBar}%') 
+            OR 
+            (`tags` LIKE '%{local_searchBar}%')
+        )"""
+        
+        searchBarFilterSQL = searchBar_SQL
+        return searchBarFilterSQL
+    def generate_culturalDietaryRestrictionSQL(self):
+        local_cultural_dietaryRestriction = self.userInputs["searchFilters"]["cultural_dietaryRestriction"]
+
+        cultural_dietaryRestriction_SQL = f"(RestaurantDietaryRestriction.dietary_restriction_id = {local_cultural_dietaryRestriction})"
+
+        culturalDietaryRestrictionSQL = cultural_dietaryRestriction_SQL
+        return culturalDietaryRestrictionSQL
+
+
+    def generate_minPriceFilterSQL(self):
+        local_minPrice = self.userInputs["searchFilters"]["min_price"]
+        local_exactPrice = self.userInputs["searchFilters"]["exact_price"]
+
+
+        if local_exactPrice:
+            minPrice_operator = " = "
+        else:
+            minPrice_operator = " >= "
+
+        if local_minPrice:
+            min_PriceFilter_SQL = f"(min_cost {minPrice_operator} {local_minPrice})"
+        else:
+            min_PriceFilter_SQL = ""
+
+        minPriceFilterSQL = min_PriceFilter_SQL
+        return minPriceFilterSQL
+    
+    def generate_maxPriceFilterSQL(self):
+        local_maxPrice = self.userInputs["searchFilters"]["min_price"]
+        local_exactPrice = self.userInputs["searchFilters"]["exact_price"]
+
+
+        if local_exactPrice:
+            maxPrice_operator = " = "
+        else:
+            maxPrice_operator = " <= "
+
+        if local_maxPrice:
+            max_PriceFilter_SQL = f"(min_cost {maxPrice_operator} {local_maxPrice})"
+        else:
+            max_PriceFilter_SQL = ""
+
+        maxPriceFilterSQL = max_PriceFilter_SQL
+        return maxPriceFilterSQL
+
+
+    def generate_searchFilterSQL(self):
+        searchBarFilter_SQL = self.generate_searchBarFilterSQL
+        cultural_dietaryRestriction_SQL = self.generate_culturalDietaryRestrictionSQL
+        min_PriceFilter_SQL = self.generate_minPriceFilterSQL()
+        max_PriceFilter_SQL = self.generate_maxPriceFilterSQL()
+
+        searchFilter_SQL = [searchBarFilter_SQL, cultural_dietaryRestriction_SQL, min_PriceFilter_SQL, max_PriceFilter_SQL]
+
+        searchFilterSQL = searchFilter_SQL
+        return searchFilterSQL
+
+
+    def generate_whereSQL(self):
+        filter_DishMap_SQL = """
+            Restaurant.id != 0
+        """
+        searchFilter_SQL = self.generate_searchFilterSQL()
+
+        filterSQL_list = filter_DishMap_SQL + searchFilter_SQL
+        filter_SQL = " AND ".join(filter(None, filterSQL_list))
+
+        whereSQL = "WHERE " + filter_SQL
+        return whereSQL
+    
+    def generate_searchSQL(self):
+        select_SQL = self.generate_selectSQL()
+        join_SQL = self.generate_joinSQL()
+        where_sql = self.generate_whereSQL()
+
+        searchSQL = 
+        return searchSQL
+
+
+
+
+
+
+
+
+
+
 # '%%' look for stuff between words
 def empty_value_filter(values):
     def not_empty(value):
@@ -339,7 +542,6 @@ def restaurant_browser():
     paginationRecommendations_value = request.args.get("pagination-recommendations")
 
     limit = 10
-
     cursor.execute(f"""SELECT COUNT(FavoriteRestaurants.user_id = 1) AS "favNum", COUNT(*) AS "allNum"
                 FROM Restaurant
                 LEFT JOIN FavoriteRestaurants ON 
