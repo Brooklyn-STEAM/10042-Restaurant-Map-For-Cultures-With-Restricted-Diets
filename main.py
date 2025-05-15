@@ -1,35 +1,274 @@
 devMode = {
     "on": True
 }
+class generate_universalSQL:
+    def __init__(self, section, current_route):
+        self.section = section
+        self.current_route = current_route
+
+    def generate_selectSQL(self, mode_count):
+        section = self.section
+        current_route = self.current_route
+        mode_count = mode_count
+        
+        if mode_count:
+            if section == "searches":
+                selectedCol_SQL = """
+                    COUNT(*) AS searchesResultRows_int
+                """
+            elif section == "favorites":
+                selectedCol_SQL = """
+                    COUNT(FavoriteRestaurants.user_id = 1) AS allResultRows_int,
+                    COUNT(*) AS favoritesResultRows_int
+                """
+            elif section == "recommendations":
+                selectedCol_SQL = """
+                    COUNT(FavoriteRestaurants.user_id = 1) AS allResultRows_int,
+                    COUNT(*) AS favoritesResultRows_int
+                """
+            else:
+                selectedCol_SQL = """
+                    COUNT(FavoriteRestaurants.user_id = 1) AS allResultRows_int,
+                    COUNT(*) AS favoritesResultRows_int
+                """
+        else:
+            if current_route == "/restaurant_browser":
+                selectedCol_SQL = """
+                    Restaurant.id as restaurant_id,
+                    name, 
+                    type,  
+                    min_cost, 
+                    max_cost, 
+                    image, 
+                    FavoriteRestaurants.id as favorite_restaurants_id,
+                    FavoriteRestaurants.user_id 
+                """
+            elif current_route == "/map":
+                selectedCol_SQL = """
+                    Restaurant.id as restaurant_id,
+                    name, 
+                    type,  
+                    min_cost, 
+                    max_cost, 
+                    image, 
+                    FavoriteRestaurants.id as favorite_restaurants_id,
+                    FavoriteRestaurants.user_id, 
+                    lng,
+                    lat
+                """
+        select_SQL = f"""
+            SELECT 
+                {selectedCol_SQL}
+            FROM Restaurant
+        """
+        return select_SQL
+    
+    def generate_joinSQL(self, cultural_dietaryRestriction):
+        current_user_id = self.current_user["id"]
+        cultural_dietaryRestriction = cultural_dietaryRestriction
+        
+        if cultural_dietaryRestriction:
+            join_SQL = f"""
+                LEFT JOIN FavoriteRestaurants 
+                    ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                        AND FavoriteRestaurants.user_id = {current_user_id}
+                JOIN RestaurantDietaryRestriction
+                    ON Restaurant.id = RestaurantDietaryRestriction.restaurant_id
+
+            """
+        else:
+            join_SQL = f"""
+                LEFT JOIN FavoriteRestaurants 
+                    ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                        AND FavoriteRestaurants.user_id = {current_user_id}
+            """
+
+        return join_SQL
+
+
+class generate_searchesSQL:
+    def __init__(self, current_user, current_route, limit):
+        self.current_user = current_user
+        self.current_route = current_route
+        self.limit = limit
+        self.generate_universalSQL = generate_universalSQL("searches", self.current_route)
+
+
+        if self.limit:
+            self.mode_count = True
+        else:
+            self.mode_count = False
+
+    
+
+    def generate_searchBarFilterSQL(self):
+        searchBar = self.current_user["inputs"]["searchFilters"]["searchBar"]
+
+        searchBar_SQL = f"""(
+            (`name` LIKE '%{searchBar}%') 
+            OR 
+            (`address` LIKE '%{searchBar}%')
+            OR 
+            (`type` LIKE '%{searchBar}%') 
+            OR 
+            (`description` LIKE '%{searchBar}%') 
+            OR 
+            (`tags` LIKE '%{searchBar}%')
+        )"""
+        
+        return searchBar_SQL
+    
+    def generate_culturalDietaryRestrictionSQL(self):
+        cultural_dietaryRestriction = self.current_user["inputs"]["searchFilters"]["cultural_dietaryRestriction"]
+
+        cultural_dietaryRestriction_SQL = f"(RestaurantDietaryRestriction.dietary_restriction_id = {cultural_dietaryRestriction})"
+
+        return cultural_dietaryRestriction_SQL
+
+
+    def generate_minPriceFilterSQL(self):
+        min_price = self.current_user["inputs"]["searchFilters"]["min_price"]
+        exact_price = self.current_user["inputs"]["searchFilters"]["exact_price"]
+
+        if exact_price:
+            if exact_price:
+                minPrice_operator = " = "
+            else:
+                minPrice_operator = " >= "
+
+            min_PriceFilter_SQL = f"(min_cost {minPrice_operator} {min_price})"
+        else:
+            min_PriceFilter_SQL = ""
+
+        return min_PriceFilter_SQL
+    
+    def generate_maxPriceFilterSQL(self):
+        max_price = self.current_user["inputs"]["searchFilters"]["max_price"]
+        exact_price = self.current_user["inputs"]["searchFilters"]["exact_price"]
+
+        if max_price:
+            if exact_price:
+                maxPrice_operator = " = "
+            else:
+                maxPrice_operator = " <= "
+
+            max_PriceFilter_SQL = f"(min_cost {maxPrice_operator} {maxPrice_operator})"
+        else:
+            max_PriceFilter_SQL = ""
+
+        return max_PriceFilter_SQL
+
+    def generate_whereSQL(self):
+        searchBarFilter_SQL = self.generate_searchBarFilterSQL()
+        cultural_dietaryRestriction_SQL = self.generate_culturalDietaryRestrictionSQL()
+        min_PriceFilter_SQL = self.generate_minPriceFilterSQL()
+        max_PriceFilter_SQL = self.generate_maxPriceFilterSQL()
+        FishMap_SQL = """
+            Restaurant.id != 0
+        """
+
+        filterSQL_list = [
+            FishMap_SQL,
+            searchBarFilter_SQL, 
+            cultural_dietaryRestriction_SQL, 
+            min_PriceFilter_SQL,
+            max_PriceFilter_SQL
+        ]
+        filter_SQL = " AND ".join(filter(None, filterSQL_list))
+
+        where_SQL = "WHERE" + " " + filter_SQL
+        return where_SQL
+    
+    def return_searchSQL(self):
+        select_SQL = self.generate_selectSQL()
+        join_SQL = self.generate_joinSQL()
+        where_sql = self.generate_whereSQL()
+
+        search_SQL = select_SQL + join_SQL + where_sql
+        return search_SQL
+    
+
+
+    
+
+    
+    
+
+
+
+
+
 class Browser:
     def __init__(self, current_user_id, request, limit):
-        self.current_user_id = current_user_id
-        self.request = request
         self.limit = limit
-        self.current_route = self.request.path
-        self.userInputs = {
-            "has": False,
-            "searchFilters": {
-                "searchBar": self.request.args.get("query"),
-                "cultural_dietaryRestriction": self.request.args.get("dietary_restriction_radio"),
-                "min_price": self.request.args.get('price_min_filter'),
-                "max_price": self.request.args.get('price_max_filter'),
-                "exact_price": bool(self.requestrequest.args.get("exact_price_toggle"))
-            },
-            "pagination": {
-                "searches": self.request.args.get("pagination-searchs"), # fix spelling
-                "favorites": self.request.args.get("pagination-favorites"),
-                "recommendations": self.request.args.get("pagination-recommendations")
+        self.current_route = request.path
+
+        self.current_user = {
+            "id": current_user_id,
+            "inputs": {
+                "searchFilters": {
+                    "searchBar": request.args.get("query"),
+                    "cultural_dietaryRestriction": request.args.get("dietary_restriction_radio"),
+                    "min_price": request.args.get('price_min_filter'),
+                    "max_price": request.args.get('price_max_filter'),
+                    "exact_price": bool(request.args.get("exact_price_toggle")),
+                },
+
+                "has_searchFilters": False,
+
+                "pagination": {
+                    "searches": request.args.get("pagination-searchs"), # fix spelling
+                    "favorites": request.args.get("pagination-favorites"),
+                    "recommendations": request.args.get("pagination-recommendations")
+                }
             }
         }
 
-        
         for key in dict.keys(self.userInputs["searchFilters"]):
             if self.userInputs["searchFilters"][key] and key != "exact_price":
                 self.userInputs["has"] = True
+        
+        self.generate_SQL = {
+            "searches": {
+                "columns": generate_searchesSQL(self.current_user, self.current_route, self.limit),
+                "count":  generate_searchesSQL(self.current_user, self.current_route, False)
+            },
+            "favorites": {
+
+            },
+            "recommendations": {
+
+            }
+
+            
+        }
 
     def __str__(self):
         return self.request
+    
+    def return_browserData(self):
+        browser_data = {
+            "searches": {
+                "results": "<--Replace-->",
+                "count": "<--Replace-->",
+                "current_page": "<--Replace-->",
+                "max_page": "<--Replace-->"
+            },
+            "favorites":{
+                "results": "<--Replace-->",
+                "count": "<--Replace-->",
+                "current_page": "<--Replace-->",
+                "max_page": "<--Replace-->"
+            },
+            "recommendations":{
+                "results": "<--Replace-->",
+                "count": "<--Replace-->",
+                "current_page": "<--Replace-->",
+                "max_page": "<--Replace-->"
+            },
+            "has_searchFilters": self.current_user["has_searchFilters"]
+        }
+        return browser_data
     
     def generate_selectedColSQL(self, section, mode_count):
         local_current_route = self.current_route
@@ -97,100 +336,7 @@ class Browser:
         joinSQL = join_SQL
         return joinSQL
     
-    def generate_searchBarFilterSQL(self):
-        local_searchBar = self.userInputs["searchFilters"]["searchBar"]
 
-        searchBar_SQL = f"""(
-            (`name` LIKE '%{local_searchBar}%') 
-            OR 
-            (`address` LIKE '%{local_searchBar}%')
-            OR 
-            (`type` LIKE '%{local_searchBar}%') 
-            OR 
-            (`description` LIKE '%{local_searchBar}%') 
-            OR 
-            (`tags` LIKE '%{local_searchBar}%')
-        )"""
-        
-        searchBarFilterSQL = searchBar_SQL
-        return searchBarFilterSQL
-    def generate_culturalDietaryRestrictionSQL(self):
-        local_cultural_dietaryRestriction = self.userInputs["searchFilters"]["cultural_dietaryRestriction"]
-
-        cultural_dietaryRestriction_SQL = f"(RestaurantDietaryRestriction.dietary_restriction_id = {local_cultural_dietaryRestriction})"
-
-        culturalDietaryRestrictionSQL = cultural_dietaryRestriction_SQL
-        return culturalDietaryRestrictionSQL
-
-
-    def generate_minPriceFilterSQL(self):
-        local_minPrice = self.userInputs["searchFilters"]["min_price"]
-        local_exactPrice = self.userInputs["searchFilters"]["exact_price"]
-
-
-        if local_exactPrice:
-            minPrice_operator = " = "
-        else:
-            minPrice_operator = " >= "
-
-        if local_minPrice:
-            min_PriceFilter_SQL = f"(min_cost {minPrice_operator} {local_minPrice})"
-        else:
-            min_PriceFilter_SQL = ""
-
-        minPriceFilterSQL = min_PriceFilter_SQL
-        return minPriceFilterSQL
-    
-    def generate_maxPriceFilterSQL(self):
-        local_maxPrice = self.userInputs["searchFilters"]["min_price"]
-        local_exactPrice = self.userInputs["searchFilters"]["exact_price"]
-
-
-        if local_exactPrice:
-            maxPrice_operator = " = "
-        else:
-            maxPrice_operator = " <= "
-
-        if local_maxPrice:
-            max_PriceFilter_SQL = f"(min_cost {maxPrice_operator} {local_maxPrice})"
-        else:
-            max_PriceFilter_SQL = ""
-
-        maxPriceFilterSQL = max_PriceFilter_SQL
-        return maxPriceFilterSQL
-
-
-    def generate_searchFilterSQL(self):
-        searchBarFilter_SQL = self.generate_searchBarFilterSQL
-        cultural_dietaryRestriction_SQL = self.generate_culturalDietaryRestrictionSQL
-        min_PriceFilter_SQL = self.generate_minPriceFilterSQL()
-        max_PriceFilter_SQL = self.generate_maxPriceFilterSQL()
-
-        searchFilter_SQL = [searchBarFilter_SQL, cultural_dietaryRestriction_SQL, min_PriceFilter_SQL, max_PriceFilter_SQL]
-
-        searchFilterSQL = searchFilter_SQL
-        return searchFilterSQL
-
-
-    def generate_whereSQL(self):
-        filter_DishMap_SQL = """
-            Restaurant.id != 0
-        """
-        searchFilter_SQL = self.generate_searchFilterSQL()
-
-        filterSQL_list = filter_DishMap_SQL + searchFilter_SQL
-        filter_SQL = " AND ".join(filter(None, filterSQL_list))
-
-        whereSQL = "WHERE " + filter_SQL
-        return whereSQL
-    
-    def generate_searchSQL(self):
-        select_SQL = self.generate_selectSQL()
-        join_SQL = self.generate_joinSQL()
-        where_sql = self.generate_whereSQL()
-
-        searchSQL = 
-        return searchSQL
 
 
 
