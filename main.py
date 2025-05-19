@@ -201,23 +201,34 @@ def return_restaurantSQL(limit, current_route, current_user, section, offset):
     offset = offset
 
 def return_currentUser(current_user_id, request):
+    searchBar = request.args.get("query")
+    cultural_dietaryRestriction = request.args.get("dietary_restriction_radio")
+    min_price = request.args.get('price_min_filter')
+    max_price = request.args.get('price_max_filter')
+    exact_price = bool(request.args.get("exact_price_toggle"))
+
+    bool(request.args.get("exact_price_toggle"))
+    curr_searchesPagination = request.args.get("pagination-searchs")
+    curr_favoritesPagination = request.args.get("pagination-favorites")
+    curr_recommendationsPagination = request.args.get("pagination-recommendations")
+
     current_user = {
         "id": current_user_id,
         "inputs": {
             "searchFilters": {
-                "searchBar": request.args.get("query"),
-                "cultural_dietaryRestriction": request.args.get("dietary_restriction_radio"),
-                "min_price": request.args.get('price_min_filter'),
-                "max_price": request.args.get('price_max_filter'),
-                "exact_price": bool(request.args.get("exact_price_toggle")),
+                "searchBar": searchBar,
+                "cultural_dietaryRestriction": cultural_dietaryRestriction,
+                "min_price": min_price,
+                "max_price": max_price,
+                "exact_price": exact_price,
             },
 
-            "has_searchFilters": False,
+            "has_searchFilters": True if searchBar or cultural_dietaryRestriction or min_price or max_price else False,
 
             "paginations": {
-                "searches": request.args.get("pagination-searchs"), # fix spelling
-                "favorites": request.args.get("pagination-favorites"),
-                "recommendations": request.args.get("pagination-recommendations")
+                "searches": curr_searchesPagination if curr_searchesPagination else "1", # fix spelling
+                "favorites": curr_favoritesPagination if curr_favoritesPagination else "1",
+                "recommendations": curr_recommendationsPagination if curr_recommendationsPagination else "1"
             }
         }
     }
@@ -229,6 +240,10 @@ class Browser:
         self.limit = limit
         self.current_route = request.path
         self.current_user = return_currentUser(current_user_id, request)
+
+        self.searchesCount_SQL = return_countSQL(self.current_route, self.current_user, "searches")
+        cursor.execute(self.searchesCount_SQL)
+        self.searches_count = cursor.fetchone()
         
         self.favoritesCount_SQL = return_countSQL(self.current_route, self.current_user, "favorites")
         cursor.execute(self.favoritesCount_SQL)
@@ -239,23 +254,27 @@ class Browser:
         self.recommendations_count = cursor.fetchone()
 
         self.max_pages = {
-            "searches": None,
-            "favorites": ceil(self.favorites_count["favoritesRows_int"]/self.limit),
-            "recommendations": ceil(self.recommendations_count["allResultRows_int"]/self.limit)
+            "searches": str(ceil(int(self.searches_count["searchesResultRows_int"])/self.limit)),
+            "favorites": str(ceil(int(self.favorites_count["favoritesRows_int"])/self.limit)),
+            "recommendations": str(ceil(int(self.recommendations_count["allResultRows_int"])/self.limit))
         }
         
         self.current_pages = {
-            "searches": None,
-            "favorites": self.current_user["inputs"]["paginations"]["favorites"] if self.current_user["inputs"]["paginations"]["favorites"] > self.max_pages["favorites"] else self.max_pages["favorites"],
-            "recommendations": self.current_user["inputs"]["paginations"]["recommendations"] if self.current_user["inputs"]["paginations"]["recommendations"] > self.max_pages["recommendations"] else self.max_pages["recommendations"]
+            "searches": str(self.current_user["inputs"]["paginations"]["searches"]) if int(self.current_user["inputs"]["paginations"]["searches"]) > int(self.max_pages["searches"]) else self.max_pages["searches"],
+            "favorites": str(self.current_user["inputs"]["paginations"]["favorites"]) if int(self.current_user["inputs"]["paginations"]["favorites"]) > int(self.max_pages["favorites"]) else self.max_pages["favorites"],
+            "recommendations": str(self.current_user["inputs"]["paginations"]["recommendations"]) if int(self.current_user["inputs"]["paginations"]["recommendations"]) > int(self.max_pages["recommendations"]) else self.max_pages["recommendations"]
         }
 
         self.offset = {
-            "searches": None,
-            "favorites": self.current_pages["favorites"] * 10,
-            "recommendations": self.current_pages["recommendations"] * 10
+            "searches": str(int(self.current_pages["searches"]) * 10),
+            "favorites": str(int(self.current_pages["favorites"]) * 10),
+            "recommendations": str(int(self.current_pages["recommendations"]) * 10)
         }
         
+        self.searchesColumn_SQL = return_columnSQL(self.limit, self.current_route, self.current_user, "searches", self.offset["searches"])
+        cursor.execute(self.searchesColumn_SQL)
+        self.searches_columns = cursor.fetchall() 
+
         self.favoritesColumn_SQL = return_columnSQL(self.limit, self.current_route, self.current_user, "favorites", self.offset["favorites"])
         cursor.execute(self.favoritesColumn_SQL)
         self.favorites_columns = cursor.fetchall() 
@@ -263,63 +282,28 @@ class Browser:
         self.recommendationsColumn_SQL = return_columnSQL(self.limit, self.current_route, self.current_user, "recommendations", self.offset["recommendations"])
         cursor.execute(self.recommendationsColumn_SQL)
         self.recommendations_columns = cursor.fetchall() 
-            
-        if self.current_user["inputs"]["has_searchFilters"]:
-            self.searchesCount_SQL = return_countSQL(self.current_route, self.current_user, "searches")
-            cursor.execute(self.searchesCount_SQL)
-            self.searches_count = cursor.fetchone()
-
-            self.max_pages["searches"] = ceil(self.searches_count["searchesResultRows_int"]/self.limit)
-            self.current_pages["searches"] = self.current_user["inputs"]["paginations"]["searches"] if self.current_user["inputs"]["paginations"]["searches"] > self.max_pages["searches"] else self.max_pages["searches"]
-            self.offset["searches"] = self.current_pages["searches"] * 10
-
-            self.searchesColumn_SQL = return_columnSQL(self.limit, self.current_route, self.current_user, "searches", self.offset["searches"])
-            cursor.execute(self.searchesColumn_SQL)
-            self.searches_columns = cursor.fetchall() 
-
-            self.browser_data = {
-                "searches": {
-                    "results": self.searches_columns,
-                    "count": self.searches_count,
-                    "current_page": self.current_pages["searches"],
-                    "max_page": self.max_pages["searches"]
-                },
-                "favorites":{
-                    "results": self.favorites_columns,
-                    "count": self.favorites_count,
-                    "current_page": self.current_pages["favorites"],
-                    "max_page": self.max_pages["favorites"]
-                },
-                "recommendations":{
-                    "results": self.recommendations_columns,
-                    "count": self.recommendations_count,
-                    "current_page": self.current_pages["recommendations"],
-                    "max_page": self.max_pages["recommendations"]
-                },
-                "current_user": self.current_user
-            }
-        else:
-            self.browser_data = {
-                "searches": {
-                    "results": None,
-                    "count": None,
-                    "current_page": None,
-                    "max_page": None
-                },
-                "favorites":{
-                    "results": self.favorites_columns,
-                    "count": self.favorites_count,
-                    "current_page": self.current_pages["favorites"],
-                    "max_page": self.max_pages["favorites"]
-                },
-                "recommendations":{
-                    "results": self.recommendations_columns,
-                    "count": self.recommendations_count,
-                    "current_page": self.current_pages["recommendations"],
-                    "max_page": self.max_pages["recommendations"]
-                },
-                "current_user": self.current_user
-            }
+        
+        self.browser_data = {
+            "searches": {
+                "results": self.searches_columns,
+                "count": self.searches_count,
+                "current_page": self.current_pages["searches"],
+                "max_page": self.max_pages["searches"]
+            },
+            "favorites":{
+                "results": self.favorites_columns,
+                "count": self.favorites_count,
+                "current_page": self.current_pages["favorites"],
+                "max_page": self.max_pages["favorites"]
+            },
+            "recommendations":{
+                "results": self.recommendations_columns,
+                "count": self.recommendations_count,
+                "current_page": self.current_pages["recommendations"],
+                "max_page": self.max_pages["recommendations"]
+            },
+            "current_user": self.current_user
+        }
 
 
 
