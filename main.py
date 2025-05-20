@@ -1,6 +1,17 @@
 devMode = {
     "on": True
 }
+# try:
+#     if devMode["on"]: print(f"Start: Calculate {section} Max Page")      
+# except:
+#     if devMode["on"]: print(f"Error: Calculate {section} Max Page")
+# else:
+#     if devMode["on"]: print(f"success: Calculate {section} Max Page")
+# finally:
+#     if devMode["on"]: print(f"End: Calculate {section} Max Page")
+
+
+
 def return_searchBarSQL(searchBar):
     if searchBar:
         searchBar_SQL = f"""(
@@ -237,70 +248,163 @@ def return_currentUser(current_user_id, request):
 
 class Browser:
     def __init__(self, current_user_id: int, request: object, cursor: object, limit: int):
+        if devMode["on"]: print("initializing Browser")
         self.limit = limit
         self.current_route = request.path
         self.current_user = return_currentUser(current_user_id, request)
+        self.current_userPageInputs = self.current_user["inputs"]["paginations"]
 
-        self.searchesCount_SQL = return_countSQL(self.current_route, self.current_user, "searches")
-        cursor.execute(self.searchesCount_SQL)
-        self.searches_count = cursor.fetchone()
+        self.countSQL_dict: dict = {}
+        self.countInt_dict: dict = {}
+        self.max_pageInt_dict: dict = {}
+        self.current_pageInt_dict: dict = {}
+        self.offset_dict: dict = {}
+        self.columnSQL_dict: dict = {}
+        self.columns_dict: dict = {}
+
+
+
+        section_list = ["searches", "favorites", "recommendations"]
         
-        self.favoritesCount_SQL = return_countSQL(self.current_route, self.current_user, "favorites")
-        cursor.execute(self.favoritesCount_SQL)
-        self.favorites_count = cursor.fetchone()
+        for section in section_list:
+            if devMode["on"]: print(f"Start: Getting {section} Data")
 
-        self.recommendationsCount_SQL = return_countSQL(self.current_route, self.current_user, "recommendations")
-        cursor.execute(self.recommendationsCount_SQL)
-        self.recommendations_count = cursor.fetchone()
+            countSQL_key: str = section
+            try:
+                if devMode["on"]: print(f"Start: Getting {section} Count SQL")
 
-        self.max_pages = {
-            "searches": str(ceil(int(self.searches_count["searchesResultRows_int"])/self.limit)),
-            "favorites": str(ceil(int(self.favorites_count["favoritesRows_int"])/self.limit)),
-            "recommendations": str(ceil(int(self.recommendations_count["allResultRows_int"])/self.limit))
-        }
+                count_SQL = return_countSQL(self.current_route, self.current_user, section)      
+            except:
+                if devMode["on"]: print(f"Error: Getting {section} Count SQL")
+                if devMode["on"]: print(count_SQL)
+            else:
+                if devMode["on"]: print(f"success: Getting {section} Count SQL")
+
+                self.countSQL_dict[countSQL_key] = count_SQL
+            finally:
+                if devMode["on"]: print(f"End: Getting {section} Count SQL")
+                
+            countint_key: str = section
+            try:
+                if devMode["on"]: print(f"Start: Counting {section}")
+                
+                cursor.execute(self.countSQL_dict[countSQL_key])
+                count_int = cursor.fetchone()
+                
+            except:
+                if devMode["on"]: print(f"Error: Counting {section}")
+            else:
+                if devMode["on"]: print(f"Success: Counting {section}")
+
+                self.countInt_dict[countint_key] = count_int
+            finally:
+                if devMode["on"]: print(f"End: Counting {section}")
+
+            max_page_key: str = section
+            try:
+                if devMode["on"]: print(f"Start: Calculate {section} Max Page")
+                count_int = (self.countInt_dict[countint_key])
+                limit_int = (self.limit)
+
+                max_page_int = ceil(count_int/limit_int)
+            except:
+                if devMode["on"]: 
+                    print(f"Error: Calculate {section} Max Page")
+                    print(f"count_int: {count_int}")
+                    print(f"limit_int: {limit_int}")
+            else:
+                if devMode["on"]: print(f"Success: Calculate {section} Max Page")
+
+                self.max_pageInt_dict[max_page_key] = max_page_int
+            finally:
+                if devMode["on"]: print(f"End: Calculate {section} Max Page")
+
+            current_page_key: str = section
+            try:
+                if devMode["on"]: print(f"Start: Calculate {section} Current Page")
+                input_Page_int = int(self.current_userPageInputs[section])
+                max_page_int = int(self.max_pageInt_dict[max_page_key])
+
+                if input_Page_int > max_page_int:
+                    current_page = max_page_int
+                else:
+                    current_page = input_Page_int
+            except:
+                if devMode["on"]: print(f"Error: Calculate {section} Current Page")
+            else:
+                if devMode["on"]: print(f"Success: Calculate {section} Current Page")
+                self.current_pageInt_dict[current_page_key] = current_page
+            finally:
+                if devMode["on"]: print(f"End: Calculate {section} Current Page")
+
+            offset_key = section
+            try:
+                if devMode["on"]: print(f"Start: Calculate {section} Offset")
+                current_sectionPage_int = int(self.current_pageInt_dict[f"current_{section}Page"])
+            except:
+                if devMode["on"]: print(f"Error: Calculate {section} Offset")
+            else:
+                if devMode["on"]: print(f"Success: Calculate {section} Offset")
+                self.offset_dict[offset_key] = current_sectionPage_int * 10
+            finally:
+                if devMode["on"]: print(f"End: Calculate {section} Offset")
+            
+            
+            columnSQL_key = section
+            try:
+                if devMode["on"]: print(f"Start: Getting {section} Column SQL")
+
+                columnSQL = return_columnSQL(self.limit, self.current_route, self.current_user, section, self.offset_dict[section])
+            except:
+                if devMode["on"]: print(f"Error: Getting {section} Column SQL")
+            else:
+                if devMode["on"]: print(f"Success: Getting {section} Column SQL")
+
+                self.columnSQL_dict[columnSQL_key] = columnSQL
+            finally:
+                if devMode["on"]: print(f"End: Getting {section} Column SQL")
+            
+            if devMode["on"]: print(f"End: Getting {section} Column SQL")
+
+
+            columns_key = section
+            devLogs: str = f"Querying {section} Columns"
+            try:
+                if devMode["on"]: print(f"Start: {devLogs}")
+
+                cursor.execute(self.columnSQL_dict[columnSQL_key])
+                columns_dict = cursor.fetchall() 
+            except:
+                if devMode["on"]: print(f"Error: {devLogs}")
+            else:
+                if devMode["on"]: print(f"Success: {devLogs}")
+
+                self.columns_dict[columns_key] = columns_dict
+            finally:
+                if devMode["on"]: print(f"End: {devLogs}")
+            
+            if devMode["on"]: print(f"End: Getting {section} Column SQL")
+
+        if devMode["on"]: print(f"End: Getting {section} Data")
         
-        self.current_pages = {
-            "searches": str(self.current_user["inputs"]["paginations"]["searches"]) if int(self.current_user["inputs"]["paginations"]["searches"]) > int(self.max_pages["searches"]) else self.max_pages["searches"],
-            "favorites": str(self.current_user["inputs"]["paginations"]["favorites"]) if int(self.current_user["inputs"]["paginations"]["favorites"]) > int(self.max_pages["favorites"]) else self.max_pages["favorites"],
-            "recommendations": str(self.current_user["inputs"]["paginations"]["recommendations"]) if int(self.current_user["inputs"]["paginations"]["recommendations"]) > int(self.max_pages["recommendations"]) else self.max_pages["recommendations"]
-        }
-
-        self.offset = {
-            "searches": str(int(self.current_pages["searches"]) * 10),
-            "favorites": str(int(self.current_pages["favorites"]) * 10),
-            "recommendations": str(int(self.current_pages["recommendations"]) * 10)
-        }
-        
-        self.searchesColumn_SQL = return_columnSQL(self.limit, self.current_route, self.current_user, "searches", self.offset["searches"])
-        cursor.execute(self.searchesColumn_SQL)
-        self.searches_columns = cursor.fetchall() 
-
-        self.favoritesColumn_SQL = return_columnSQL(self.limit, self.current_route, self.current_user, "favorites", self.offset["favorites"])
-        cursor.execute(self.favoritesColumn_SQL)
-        self.favorites_columns = cursor.fetchall() 
-
-        self.recommendationsColumn_SQL = return_columnSQL(self.limit, self.current_route, self.current_user, "recommendations", self.offset["recommendations"])
-        cursor.execute(self.recommendationsColumn_SQL)
-        self.recommendations_columns = cursor.fetchall() 
-        
-        self.browser_data = {
+        self.public_data = {
             "searches": {
-                "results": self.searches_columns,
-                "count": self.searches_count,
-                "current_page": self.current_pages["searches"],
-                "max_page": self.max_pages["searches"]
+                "results": self.columns_dict["searches"],
+                "count": self.countInt_dict["searches"],
+                "current_page": self.current_pageInt_dict["searches"],
+                "max_page": self.max_pageInt_dict["searches"]
             },
             "favorites":{
-                "results": self.favorites_columns,
-                "count": self.favorites_count,
-                "current_page": self.current_pages["favorites"],
-                "max_page": self.max_pages["favorites"]
+                "results": self.columns_dict["favorites"],
+                "count": self.countInt_dict["favorites"],
+                "current_page": self.current_pageInt_dict["favorites"],
+                "max_page": self.max_pageInt_dict["favorites"]
             },
             "recommendations":{
-                "results": self.recommendations_columns,
-                "count": self.recommendations_count,
-                "current_page": self.current_pages["recommendations"],
-                "max_page": self.max_pages["recommendations"]
+                "results": self.columns_dict["recommendations"],
+                "count": self.countInt_dict["recommendations"],
+                "current_page": self.current_pageInt_dict["recommendations"],
+                "max_page": self.max_pageInt_dict["recommendations"]
             },
             "current_user": self.current_user
         }
