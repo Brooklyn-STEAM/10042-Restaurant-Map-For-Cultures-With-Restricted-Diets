@@ -28,6 +28,7 @@ def return_searchBarSQL(searchBar):
         return searchBar_SQL
     else:
         return ""
+
 def return_culturalDietaryRestrictionSQL(cultural_dietaryRestriction):
     if cultural_dietaryRestriction:
         cultural_dietaryRestriction_SQL = f"(RestaurantDietaryRestriction.dietary_restriction_id = {cultural_dietaryRestriction})"
@@ -62,26 +63,16 @@ def return_maxPriceFilterSQL(max_price, exact_price):
     return max_priceFilter_SQL
 
 def return_selectSQL(section, current_route, mode_count):
+    section: str = str(section)
+    current_route: str = str(current_route)
+    mode_count: bool = bool(mode_count)
+    
     if mode_count:
-        if section == "searches":
-            selectedCol_SQL = """
-                COUNT(*) AS searchesResultRows_int
-            """
-        elif section == "favorites":
-            selectedCol_SQL = """
-                COUNT(FavoriteRestaurants.user_id = 1) AS favoritesRows_int,
-                COUNT(*) AS favoritesResultRows_int
-            """
-        elif section == "recommendations":
-            selectedCol_SQL = """
-                COUNT(FavoriteRestaurants.user_id = 1) AS allResultRows_int,
-                COUNT(*) AS favoritesResultRows_int
-            """
-        else:
-            selectedCol_SQL = """
-                COUNT(FavoriteRestaurants.user_id = 1) AS allResultRows_int,
-                COUNT(*) AS favoritesResultRows_int
-            """
+        alias_str: str = f"{section}_count"
+
+        selectedCol_SQL = f"""
+            COUNT(*) AS {alias_str},
+        """            
     else:
         if current_route == "/restaurant_browser":
             selectedCol_SQL = """
@@ -134,7 +125,11 @@ def return_joinSQL(current_user_id, cultural_dietaryRestriction):
 
     return join_SQL
 
-def return_whereSQL(current_userInputs, section):
+def return_whereSQL(current_user, section):
+    current_user = current_user
+    current_user_id = current_user["id"]
+    current_userInputs = current_user["inputs"]
+    
     FishMap_SQL = """
         Restaurant.id != 0
     """
@@ -156,6 +151,14 @@ def return_whereSQL(current_userInputs, section):
             cultural_dietaryRestriction_SQL, 
             min_price_SQL,
             max_price_SQL
+        ]
+        filter_SQL = " AND ".join(filter(None, filterSQL_list))
+    elif section == "favorites":
+        favOnly_SQL = f"FavoriteRestaurants.user_id = {current_user_id}"
+        
+        filterSQL_list = [
+            FishMap_SQL,
+            favOnly_SQL, 
         ]
         filter_SQL = " AND ".join(filter(None, filterSQL_list))
     else:
@@ -180,7 +183,7 @@ def return_countSQL(current_route, current_user, section):
 
     select_SQL = return_selectSQL(section, current_route, mode_count)
     join_SQL = return_joinSQL(current_user["id"], current_user["inputs"]["searchFilters"]["cultural_dietaryRestriction"])
-    where_SQL = return_whereSQL(current_user["inputs"], section)
+    where_SQL = return_whereSQL(current_user, section)
 
     countSQL_list = [select_SQL, join_SQL, where_SQL]
     count_SQL = " ".join(filter(None, countSQL_list)) + ";"
@@ -197,19 +200,12 @@ def return_columnSQL(limit, current_route, current_user, section, offset):
 
     select_SQL = return_selectSQL(section, current_route, mode_count)
     join_SQL = return_joinSQL(current_user["id"], current_user["inputs"]["searchFilters"]["cultural_dietaryRestriction"])
-    where_SQL = return_whereSQL(current_user["inputs"], section)
+    where_SQL = return_whereSQL(current_user, section)
     limit_SQL = return_limitSQL(limit, offset, mode_count)
 
     columnSQL_list = [select_SQL, join_SQL, where_SQL, limit_SQL]
     column_SQL = " ".join(filter(None, columnSQL_list)) + ";"
     return column_SQL
-
-def return_restaurantSQL(limit, current_route, current_user, section, offset):
-    limit = limit
-    current_route = current_route
-    current_user = current_user
-    section = section
-    offset = offset
 
 def return_currentUser(current_user_id, request):
     searchBar = request.args.get("query")
@@ -254,18 +250,20 @@ class Browser:
         self.current_user = return_currentUser(current_user_id, request)
         self.current_userPageInputs = self.current_user["inputs"]["paginations"]
 
-        self.countSQL_dict: dict = {}
-        self.countInt_dict: dict = {}
-        self.max_pageInt_dict: dict = {}
-        self.current_pageInt_dict: dict = {}
-        self.offset_dict: dict = {}
-        self.columnSQL_dict: dict = {}
-        self.columns_dict: dict = {}
+        self.countSQL_dict: dict = {"searches": str, "favorites": str, "recommendations": str}
+        self.countInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
+        self.max_pageInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
+        self.current_pageInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
+        self.offset_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
+        self.columnSQL_dict: dict = {"searches": str, "favorites": str, "recommendations": str}
+        self.columns_dict: dict = {"searches": dict, "favorites": dict, "recommendations": dict}
 
 
+        if self.current_user["inputs"]["has_searchFilters"]:
+            section_list = ["searches", "favorites", "recommendations"]
+        else:
+            section_list = ["favorites", "recommendations"]
 
-        section_list = ["searches", "favorites", "recommendations"]
-        
         for section in section_list:
             if devMode["on"]: print(f"Start: Getting {section} Data")
 
@@ -289,7 +287,8 @@ class Browser:
                 if devMode["on"]: print(f"Start: Counting {section}")
                 
                 cursor.execute(self.countSQL_dict[countSQL_key])
-                count_int = cursor.fetchone()
+                count_dict = dict(cursor.fetchone())
+                count_int = count_dict[f"{section}_count"]
                 
             except:
                 if devMode["on"]: print(f"Error: Counting {section}")
@@ -308,10 +307,7 @@ class Browser:
 
                 max_page_int = ceil(count_int/limit_int)
             except:
-                if devMode["on"]: 
-                    print(f"Error: Calculate {section} Max Page")
-                    print(f"count_int: {count_int}")
-                    print(f"limit_int: {limit_int}")
+                if devMode["on"]: print(f"Error: Calculate {section} Max Page")
             else:
                 if devMode["on"]: print(f"Success: Calculate {section} Max Page")
 
@@ -389,10 +385,10 @@ class Browser:
         
         self.public_data = {
             "searches": {
-                "results": self.columns_dict["searches"],
-                "count": self.countInt_dict["searches"],
-                "current_page": self.current_pageInt_dict["searches"],
-                "max_page": self.max_pageInt_dict["searches"]
+                "results": self.columns_dict["searches"] if self.current_user["inputs"]["has_searchFilters"] else None,
+                "count": self.countInt_dict["searches"] if self.current_user["inputs"]["has_searchFilters"] else None,
+                "current_page": self.current_pageInt_dict["searches"] if self.current_user["inputs"]["has_searchFilters"] else None,
+                "max_page": self.max_pageInt_dict["searches"] if self.current_user["inputs"]["has_searchFilters"] else None
             },
             "favorites":{
                 "results": self.columns_dict["favorites"],
@@ -745,8 +741,8 @@ def restaurant_browser():
     
     current_user_id = flask_login.current_user.id
     
-    browser = Browser(current_user_id, request, cursor, 10)
-    browser_data = browser.browser_data
+    current_browser = Browser(current_user_id, request, cursor, 10)
+    browser_publicData = current_browser.public_data
 
 
     # Dietary Restriction
@@ -758,17 +754,17 @@ def restaurant_browser():
     conn.close()
 
     return render_template("restaurant_browser_page.html.jinja", 
-                            search_results = browser_data["searches"]["results"], 
-                            current_paginationSearchs_int = browser_data["searches"]["current_page"],
-                            max_paginationsearchs = browser_data["searches"]["max_page"],
+                            search_results = browser_publicData["searches"]["results"], 
+                            current_paginationSearchs_int = browser_publicData["searches"]["current_page"],
+                            max_paginationsearchs = browser_publicData["searches"]["max_page"],
 
-                            favorite_results = browser_data["favorites"]["results"], 
-                            current_paginationFavorites_int = browser_data["favorites"]["current_page"],
-                            max_paginationFavorites = browser_data["favorites"]["max_page"],
+                            favorite_results = browser_publicData["favorites"]["results"], 
+                            current_paginationFavorites_int = browser_publicData["favorites"]["current_page"],
+                            max_paginationFavorites = browser_publicData["favorites"]["max_page"],
 
-                            recommendation_results = browser_data["recommendations"]["results"], 
-                            current_paginationRecommendations_int = browser_data["recommendations"]["current_page"],
-                            max_paginationRecommendations = browser_data["recommendations"]["max_page"],
+                            recommendation_results = browser_publicData["recommendations"]["results"], 
+                            current_paginationRecommendations_int = browser_publicData["recommendations"]["current_page"],
+                            max_paginationRecommendations = browser_publicData["recommendations"]["max_page"],
                             
                             dietary_restriction_list = dietary_restriction_list)
 
