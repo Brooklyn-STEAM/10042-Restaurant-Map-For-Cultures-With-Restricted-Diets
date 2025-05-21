@@ -71,7 +71,7 @@ def return_selectSQL(section, current_route, mode_count):
         alias_str: str = f"{section}_count"
 
         selectedCol_SQL = f"""
-            COUNT(*) AS {alias_str},
+            COUNT(*) AS {alias_str}
         """            
     else:
         if current_route == "/restaurant_browser":
@@ -250,6 +250,8 @@ class Browser:
         self.current_user = return_currentUser(current_user_id, request)
         self.current_userPageInputs = self.current_user["inputs"]["paginations"]
 
+        self.cursor = cursor
+
         self.countSQL_dict: dict = {"searches": str, "favorites": str, "recommendations": str}
         self.countInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
         self.max_pageInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
@@ -286,14 +288,17 @@ class Browser:
             try:
                 if devMode["on"]: print(f"Start: Counting {section}")
                 
-                cursor.execute(self.countSQL_dict[countSQL_key])
-                count_dict = dict(cursor.fetchone())
+                self.cursor.execute(str(self.countSQL_dict[countSQL_key]))
+                count_dict = dict(self.cursor.fetchone())
                 count_int = count_dict[f"{section}_count"]
                 
             except:
                 if devMode["on"]: print(f"Error: Counting {section}")
+                print(self.countSQL_dict[countSQL_key])
             else:
-                if devMode["on"]: print(f"Success: Counting {section}")
+                if devMode["on"]: 
+                    print(f"Success: Counting {section}")
+                    print(count_int)
 
                 self.countInt_dict[countint_key] = count_int
             finally:
@@ -309,7 +314,9 @@ class Browser:
             except:
                 if devMode["on"]: print(f"Error: Calculate {section} Max Page")
             else:
-                if devMode["on"]: print(f"Success: Calculate {section} Max Page")
+                if devMode["on"]: 
+                    print(f"Success: Calculate {section} Max Page")
+                    print(max_page_int)
 
                 self.max_pageInt_dict[max_page_key] = max_page_int
             finally:
@@ -328,7 +335,9 @@ class Browser:
             except:
                 if devMode["on"]: print(f"Error: Calculate {section} Current Page")
             else:
-                if devMode["on"]: print(f"Success: Calculate {section} Current Page")
+                if devMode["on"]: 
+                    print(f"Success: Calculate {section} Current Page")
+                    print(current_page)
                 self.current_pageInt_dict[current_page_key] = current_page
             finally:
                 if devMode["on"]: print(f"End: Calculate {section} Current Page")
@@ -336,12 +345,13 @@ class Browser:
             offset_key = section
             try:
                 if devMode["on"]: print(f"Start: Calculate {section} Offset")
-                current_sectionPage_int = int(self.current_pageInt_dict[f"current_{section}Page"])
+                current_sectionPage_int = int(self.current_pageInt_dict[section])
+                offset_int = int((current_sectionPage_int - 1) * 10)
             except:
                 if devMode["on"]: print(f"Error: Calculate {section} Offset")
             else:
                 if devMode["on"]: print(f"Success: Calculate {section} Offset")
-                self.offset_dict[offset_key] = current_sectionPage_int * 10
+                self.offset_dict[offset_key] = offset_int
             finally:
                 if devMode["on"]: print(f"End: Calculate {section} Offset")
             
@@ -354,7 +364,9 @@ class Browser:
             except:
                 if devMode["on"]: print(f"Error: Getting {section} Column SQL")
             else:
-                if devMode["on"]: print(f"Success: Getting {section} Column SQL")
+                if devMode["on"]: 
+                    print(f"Success: Getting {section} Column SQL")
+                    print(columnSQL)
 
                 self.columnSQL_dict[columnSQL_key] = columnSQL
             finally:
@@ -368,8 +380,8 @@ class Browser:
             try:
                 if devMode["on"]: print(f"Start: {devLogs}")
 
-                cursor.execute(self.columnSQL_dict[columnSQL_key])
-                columns_dict = cursor.fetchall() 
+                self.cursor.execute(self.columnSQL_dict[columnSQL_key])
+                columns_dict = self.cursor.fetchall() 
             except:
                 if devMode["on"]: print(f"Error: {devLogs}")
             else:
@@ -754,18 +766,7 @@ def restaurant_browser():
     conn.close()
 
     return render_template("restaurant_browser_page.html.jinja", 
-                            search_results = browser_publicData["searches"]["results"], 
-                            current_paginationSearchs_int = browser_publicData["searches"]["current_page"],
-                            max_paginationsearchs = browser_publicData["searches"]["max_page"],
-
-                            favorite_results = browser_publicData["favorites"]["results"], 
-                            current_paginationFavorites_int = browser_publicData["favorites"]["current_page"],
-                            max_paginationFavorites = browser_publicData["favorites"]["max_page"],
-
-                            recommendation_results = browser_publicData["recommendations"]["results"], 
-                            current_paginationRecommendations_int = browser_publicData["recommendations"]["current_page"],
-                            max_paginationRecommendations = browser_publicData["recommendations"]["max_page"],
-                            
+                            browser_publicData = browser_publicData,
                             dietary_restriction_list = dietary_restriction_list)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])

@@ -81,12 +81,37 @@
 
 </section> #}
 
-
+{% if browser_publicData["current_user"]["inputs"]["has_searchFilters"] %}
+    {% set restoSection_list = ["searches", "favorites", "recommendations"] %}
+{% else %}
+    {% set restoSection_list = ["favorites", "recommendations"] %}
+{% endif %}
 <article>
+    {% for restoSection in ["searches", "favorites", "recommendations"] %}
+        <section class="row">
 
-    {% for  %}
+            <header class="row">
+                <h2>{{restoSection.capitalize()}}</h2>
+            </header>
 
+            <section class="row">
 
+                <aside class="col-4 container-fluid">
+               {{browser_publicData}}
+                    {# {% with group="searchs", current_page = browser_publicData[restoSection]["current_page"], max_page = browser_publicData[restoSection]["max_page"] %}
+                        {% include "components/pagination.html.jinja" %}
+                    {% endwith%} #}
+                </aside>
 
+                <section class="col-8 container-fluid">
+                    <img class="mg-fluid" src="static/images/restaurants/hindu_temple_canteen_building_image.jpg">
+                    {% if browser_publicData %}
+                    
+                    {% else %}
 
+                    {% endif %}
+                </section>
+            </section>
+        </section>
+    {% endfor %}
 </article>
