@@ -1,0 +1,35 @@
+<article class="card">
+    {# Favorite Toggle Buttons #}
+    <header class="header-card-topButtons">
+        {% if restaurant["user_id"] == browser_publicData["current_user"]["id"] %}
+            <form action="/restaurant_browser/delete_favorite/{{ restaurant['favorite_restaurants_id'] }}" method="post">
+                <button type="submit" class="btn btn-primary">
+                    <img src="/static/images/svgs/heart_filled.svg">
+                </button>
+            </form>
+        {% else %}
+            <form action="/restaurant_browser/insert_favorite/{{ restaurant['restaurant_id'] }}" method="post">
+                <button type="submit" class="btn btn-primary">
+                    <img src="/static/images/svgs/heart_empty.svg">
+                </button>
+            </form>
+        {% endif %} 
+    </header>
+    {# Restaurant Info #}
+    <img src="{{ restaurant['image'] }}" class="OE-img img-resto" alt="{{ restaurant['name'] }}">
+    <div class="card-body text-truncate">
+        <h5 class="card-title">{{ restaurant["name"] }}</h5>
+        
+        <p class="card-text">
+            Type: {{ restaurant["type"] }}
+        </p>
+        
+        <p class="card-text">
+            Cost: $<span>{{ restaurant["min_cost"] }}</span>-<span>{{ restaurant["max_cost"] }}</span>
+        </p>
+        
+        <a href="/individual_restaurant/{{ restaurant['restaurant_id'] }}" class="btn btn-primary">
+            Learn More
+        </a>
+    </div>
+</article>

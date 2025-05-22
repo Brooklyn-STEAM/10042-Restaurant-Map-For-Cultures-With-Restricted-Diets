@@ -171,7 +171,7 @@ def return_limitSQL(limit, offset, mode_count):
         if mode_count:
             filter_SQL = ""
         else:
-            filter_SQL = f"LIMIT {offset} {limit}"
+            filter_SQL = f"LIMIT {offset}, {limit}"
         return filter_SQL
 
 def return_countSQL(current_route, current_user, section):
