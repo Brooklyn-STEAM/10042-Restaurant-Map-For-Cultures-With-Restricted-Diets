@@ -116,21 +116,22 @@
     {% set toLoad_sections = ["favorites", "recommendations"] %}
 {% endif %}
 
-<article class="vh-100">
+<article class="">
     {% for restoSection in toLoad_sections %}
         {% set section_data = browser_publicData[restoSection] %}
 
-        <div>
+        <section>
             {# Header #}
             <header class="row">
-                <h2 class="col-auto h-1">{{restoSection.capitalize()}}
+                <h2 class="col-auto h-1">
+                    {{restoSection.capitalize()}}
                 </h2>
                 <small class="col md-0">{{ section_data["count"] }} Results</small>
             </header>
 
-            <section class="row">
+            <section class="row g-5" style="border: 2px solid white; border-radius: 10px; background-color: rgb(225 225 225 / 0.3);">
                 {# Pagination #}
-                <aside class="col-auto">
+                <aside class="col-1 border">
                     <nav class="BW-nav-browser-pagination">
                         <ul class="BW-ul-pagination-vertical">
                             <li class="BW-li-pagination-item BW-pagination-min">
@@ -165,20 +166,22 @@
                 </aside>
 
                 {# Card Group #}
-                <section class="col" style="overflow: hidden;">
-                    {% if section_data["results"] %}
-                        <section class="OE-cardGroup OE-cardGroup-xScrollable">
-                            {% for restaurant in section_data["results"] %}
-                                {% include "components/resto_card.html.jinja"%}
-                            {% endfor %}
-                        </section>
-                    {% else %}
+                <section class="col-11 border">
+                    <figure class="overflow-y-hidden overflow-x-scroll m-0 p-0" style="width:100%">
+                        {% if section_data["results"] %}
+                                <div class="text-nowrap">
+                                    {% for restaurant in section_data["results"] %}
+                                        {% include "components/resto_card.html.jinja"%}
+                                    {% endfor %}
+                                </div>
+                        {% else %}
 
 
-                    {% endif %}
+                        {% endif %}
+                    </figure>
                 </section>
             </section>
 
-        </div>
+        </section>
     {% endfor %}
 </article>

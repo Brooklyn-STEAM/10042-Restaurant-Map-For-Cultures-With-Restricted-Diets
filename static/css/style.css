@@ -16,19 +16,28 @@
             width: 20vw;
             min-height: fit-content;
             max-height: 100%;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 1 / 2;
             
         }
     }
 }
 
-.OE-bg{
-    &.bg-img-cloudly-blue{
-        background-image: url("../background.png");
-        background-repeat: no-repeat;
-        background-position: center;
-    }
+.OE-card-design-resto{
+    display: inline-block;
+    min-width: 200px;
+    width: 20vw;
+    min-height: fit-content;
+    max-height: 100%;
+    aspect-ratio: 1 / 2;
 }
+
+.OE-bg-img-cloudly-blue{
+    background-image: url("../background.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
 
 
 

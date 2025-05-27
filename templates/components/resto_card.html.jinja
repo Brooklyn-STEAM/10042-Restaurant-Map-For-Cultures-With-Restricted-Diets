@@ -1,4 +1,4 @@
-<article class="card">
+<article class="OE-card-design-resto card">
     {# Favorite Toggle Buttons #}
     <header class="header-card-topButtons">
         {% if restaurant["user_id"] == browser_publicData["current_user"]["id"] %}
@@ -17,7 +17,7 @@
     </header>
     {# Restaurant Info #}
     <img src="{{ restaurant['image'] }}" class="OE-img img-resto" alt="{{ restaurant['name'] }}">
-    <div class="card-body text-truncate">
+    <div class="card-body overflow-x-scroll">
         <h5 class="card-title">{{ restaurant["name"] }}</h5>
         
         <p class="card-text">
@@ -28,8 +28,10 @@
             Cost: $<span>{{ restaurant["min_cost"] }}</span>-<span>{{ restaurant["max_cost"] }}</span>
         </p>
         
-        <a href="/individual_restaurant/{{ restaurant['restaurant_id'] }}" class="btn btn-primary">
-            Learn More
-        </a>
+
     </div>
+    {# Individual Restaurant Page link #}
+    <a href="/individual_restaurant/{{ restaurant['restaurant_id'] }}" class="btn btn-primary">
+        Learn More
+    </a>
 </article>
