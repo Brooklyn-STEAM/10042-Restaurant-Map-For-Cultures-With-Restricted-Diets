@@ -1,115 +1,3 @@
-{# <section class="section-browser-body">
-    <section class="section-browser-searchs">
-        {% if search_results %}
-            <h2>Search Results</h2>
-            <section class="section-card-group">
-                {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
-                    {% include "components/pagination.html.jinja" %}
-                {% endwith%}
-                {% for restaurant in search_results %}
-                    {% with restaurant = restaurant %}
-                            {% include "components/restaurant_card.html.jinja"%}
-                    {% endwith %}
-                {% endfor %}
-            </section>
-        {% elif current_paginationSearchs_int > max_paginationsearchs %}
-            <h2>Search Results</h2>
-            <section class="section-card-group">
-                {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
-                    {% include "components/pagination.html.jinja" %}
-                {% endwith%}
-                <p>You don't have more than {{ max_paginationsearchs }} pages of search results.</p>
-                <p>You are on page {{ current_paginationSearchs_int }} of search results.</p>
-            </section>
-        {% elif search_input %}
-            <h2>Search Results</h2>
-            <section class="section-card-group">
-                {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
-                    {% include "components/pagination.html.jinja" %}
-                {% endwith%}
-                <p>No Match</p>                
-            </section>
-        {% endif %}
-    </section>
-    
-    {% if search_input %}
-        <hr>
-    {% endif %}
-
-    <section class="section-browser-favorites">
-        <h2>Favorites</h2>  
-        <section class="section-card-group">
-            {% with group="favorites", current_page = current_paginationFavorites_int, max_page = max_paginationFavorites %}
-                {% include "components/pagination.html.jinja" %}
-            {% endwith%}
-            {% if (favorite_results|length) > 0 %}
-                {% for restaurant in favorite_results %}
-                    {% with restaurant = restaurant %}
-                        {% include "components/restaurant_card.html.jinja"%}
-                    {% endwith %}
-                {% endfor %}
-            {% elif  current_paginationFavorites_int > max_paginationFavorites %}
-                <p>You don't have more than {{ max_paginationFavorites }} pages of favorites.</p>
-                <p>You are on page {{ current_paginationFavorites_int }} of favorites.</p>
-            {% else %}
-                <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
-            {% endif %}      
-        </section>              
-    </section>
-
-    <hr>
-
-    <section class="section-browser-recommendations">
-
-        <h2 class="h2-browser-header">Recommendations</h2>
-        <section class="section-card-group">
-            {% with group="recommendations", current_page = current_paginationRecommendations_int, max_page = max_paginationRecommendations %}
-                {% include "components/pagination.html.jinja" %}
-            {% endwith%}
-            {% if recommendation_results|length > 0 %}
-                {% for restaurant in recommendation_results %}
-                    {% with restaurant = restaurant %}
-                        {% include "components/restaurant_card.html.jinja"%}
-                    {% endwith %}
-                {% endfor %}
-            {% elif current_paginationRecommendations_int > max_paginationRecommendations %}
-                <p>There isn't more than {{ max_paginationRecommendations }} pages of recommendations.</p>
-                <p>You are on page {{ current_paginationRecommendations_int }} of recommendations.</p>
-            {% endif %}
-        </section>
-    </section>
-
-</section> #}
-
-{# 
-    browser_publicData = {
-        ["searches", "favorites", "recommendations"]: {
-            "results": dict,
-            "count": int,
-            "current_page": int,
-            "max_page": int
-        },
-        "current_user": {
-            "id": int,
-            "inputs": {
-                "searchFilters": {
-                    "searchBar": str,
-                    "cultural_dietaryRestriction": int,
-                    "min_price": int,
-                    "max_price": int,
-                    "exact_price": bool,
-                },
-
-                "has_searchFilters": bool,
-
-                "paginations": {["searches", "favorites", "recommendations"]: int}
-            }
-        }
-    }
-#}
-
-
-
 {% if browser_publicData["current_user"]["inputs"]["has_searchFilters"] %}
     {% set toLoad_sections = ["searches", "favorites", "recommendations"] %}
 {% else %}
@@ -120,68 +8,67 @@
     {% for restoSection in toLoad_sections %}
         {% set section_data = browser_publicData[restoSection] %}
 
-        <section>
+        <section class="container mb-3">
             {# Header #}
-            <header class="row">
-                <h2 class="col-auto h-1">
+            <header class="OE-bg-blurryTrans-white">
+                <h2 class="h-1">
                     {{restoSection.capitalize()}}
                 </h2>
-                <small class="col md-0">{{ section_data["count"] }} Results</small>
             </header>
 
-            <section class="row g-5" style="border: 2px solid white; border-radius: 10px; background-color: rgb(225 225 225 / 0.3);">
-                {# Pagination #}
-                <aside class="col-1 border">
-                    <nav class="BW-nav-browser-pagination">
-                        <ul class="BW-ul-pagination-vertical">
-                            <li class="BW-li-pagination-item BW-pagination-min">
-                                <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination(1, '{{ restoSection }}-turnPage-current')">
-                                    <p>1</p>
-                                </button>
-                            </li>
-                            <li class="BW-li-pagination-item BW-pagination-back">
-                                <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination({{ section_data['current_page'] - 1 }}, '{{ restoSection }}-turnPage-current')">
-                                    <img src="/static/images/svgs/arrow_up.svg">
-                                </button>
-                            </li>
+            <section class="OE-bg-blurryTrans-white">
+                <figure class="overflow-y-hidden overflow-x-scroll m-0 p-0" style="width:100%">
+                    
+                    {# Card Group Inner #}
+                    {% if section_data["results"] %}
+                        <div class="text-nowrap pt-3 pb-3">
+                            {% for restaurant in section_data["results"] %}
+                                {% include "components/resto_card.html.jinja"%}
+                            {% endfor %}
+                        </div>
+                    {% else %}
 
 
-                            <li class="BW-li-pagination-item BW-pagination-current">
-                                <input id="{{ group }}-turnPage-current" class="BW-input-pagination-turnPage" type="number" value="{{ section_data['current_page'] }}" 
-                                name="pagination-{{ group }}" form="searchBar_form">
-                            </li>
+                    {% endif %}
 
-                            <li class="BW-li-pagination-item BW-pagination-forward">
-                                <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination({{ section_data['current_page'] + 1 }}, '{{ restoSection }}-turnPage-current')">
-                                    <img src="/static/images/svgs/arrow_down.svg">
-                                </button>
-                            </li>
-                            <li class="BW-li-pagination-item BW-pagination-max">
-                                <button class="BW-input-pagination-turnPage" onclick="turn_currentPagination({{ section_data['max_page'] }}, '{{ restoSection }}-turnPage-current')">
-                                    <p>{{ section_data['max_page'] }}</p>
-                                </button>
-                            </li>
-                        </ul>
-                    </nav>
-                </aside>
-
-                {# Card Group #}
-                <section class="col-11 border">
-                    <figure class="overflow-y-hidden overflow-x-scroll m-0 p-0" style="width:100%">
-                        {% if section_data["results"] %}
-                                <div class="text-nowrap">
-                                    {% for restaurant in section_data["results"] %}
-                                        {% include "components/resto_card.html.jinja"%}
-                                    {% endfor %}
-                                </div>
-                        {% else %}
-
-
-                        {% endif %}
-                    </figure>
-                </section>
+                </figure>
             </section>
 
+            <footer class="OE-bg-blurryTrans-white">
+                <nav class="">
+                    <menu class="OE-menu-pagination">
+                        <li>
+                            <button class="" onclick="turn_currentPagination(1, '{{ restoSection }}-turnPage-current')">
+                                1
+                            </button>
+                        </li>
+                        <li>
+                            <button class="" onclick="turn_currentPagination({{ section_data['current_page'] - 1 }}, '{{ restoSection }}-turnPage-current')">
+                                <img src="/static/images/svgs/arrow_left.svg">
+                            </button>
+                        </li>
+
+
+                        <li>
+                            <input class="" type="number" value="{{ section_data['current_page'] }}" 
+                            name="pagination-{{ group }}" form="searchBar_form">
+                        </li>
+
+                        <li>
+                            <button class="" onclick="turn_currentPagination({{ section_data['current_page'] + 1 }}, '{{ restoSection }}-turnPage-current')">
+                                <img src="/static/images/svgs/arrow_right.svg">
+                            </button>
+                        </li>
+                        <li>
+                            <button class="" onclick="turn_currentPagination({{ section_data['max_page'] }}, '{{ restoSection }}-turnPage-current')">
+                                {{ section_data['max_page'] }}
+                            </button>
+                        </li>
+                    </menu>
+                </nav>
+            </footer>
+
         </section>
+        <hr>
     {% endfor %}
 </article>
