@@ -1,3 +1,7 @@
+
+
+
+
 <form id="searchBar_form" name="search_bar_form" action="{{ current_route }}" class="container" style="background-color: white;">
     <section class="input-group {% if current_route == '/restaurant_browser' %}mb-3{% endif %}">
         <input id="restaurantBrowserSearchBar" type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search..." value="{{ request.args.get('query', '') }}">
@@ -12,6 +16,7 @@
     </section>
 
     <section id="collapsibleFilter" class="filter-accordion-body collapse">
+        {# Cultural Dietary Restriction #}
         <section>
             <div>
                 <h5>
@@ -40,7 +45,33 @@
                         </abbr>
                     </label>
                 </div>
-            {% endfor %}    
+            {% endfor %}
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Cultural Dietary Restriction</span>
+                <select class="form-select" name="dietary_restriction_radio">
+                    {% if not request.args.get('dietary_restriction_radio')%}
+                        <option selected>
+                            ---
+                        </option>
+                    {% endif %}
+                    {% for dietary_restriction in dietary_restriction_list %}
+                        {% if request.args.get('dietary_restriction_radio') == dietary_restriction['id']|string %}
+                            <option value="{{ dietary_restriction['id'] }}" selected>
+                                {{ dietary_restriction["name"].capitalize() }}
+                            </option>
+
+                        {% else %}
+                            <option value="{{ dietary_restriction['id'] }}">
+                                {{ dietary_restriction["name"].capitalize() }}
+                            </option>
+
+                        {% endif %}
+                    {% endfor %}
+                </select>  
+            </div>
+
+            
+              
         </section>
 
         <section>
