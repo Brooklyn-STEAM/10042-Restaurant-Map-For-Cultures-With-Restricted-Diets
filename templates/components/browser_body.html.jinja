@@ -6,7 +6,7 @@
 
 <article class="">
     {% for restoSection in toLoad_sections %}
-        {% set section_data = browser_publicData[restoSection] %}
+        {% with section_data = browser_publicData[restoSection] %}
 
         <section class="container mb-3">
             {# Header #}
@@ -22,7 +22,7 @@
                     {# Card Group Inner #}
                     {% if section_data["results"] %}
                         <div class="text-nowrap pt-3 pb-3">
-                            {% for restaurant in section_data["results"] %}
+                            {% for restaurant in list(section_data["results"]) %}
                                 {% include "components/resto_card.html.jinja"%}
                             {% endfor %}
                         </div>
@@ -70,5 +70,6 @@
 
         </section>
         <hr>
+        {% endwith %}
     {% endfor %}
 </article>

@@ -252,13 +252,15 @@ class Browser:
 
         self.cursor = cursor
 
-        self.countSQL_dict: dict = {"searches": str, "favorites": str, "recommendations": str}
-        self.countInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
+        self.countSQL_dict: dict[str, str] = {"searches": str, "favorites": str, "recommendations": str}
+        self.countInt_dict: dict[str, int] = {"searches": int, "favorites": int, "recommendations": int}
+
         self.max_pageInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
         self.current_pageInt_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
         self.offset_dict: dict = {"searches": int, "favorites": int, "recommendations": int}
+
         self.columnSQL_dict: dict = {"searches": str, "favorites": str, "recommendations": str}
-        self.columns_dict: dict = {"searches": dict, "favorites": dict, "recommendations": dict}
+        self.columns_dict: dict = {"searches": list, "favorites": list, "recommendations": list}
 
 
         if self.current_user["inputs"]["has_searchFilters"]:
@@ -267,133 +269,65 @@ class Browser:
             section_list = ["favorites", "recommendations"]
 
         for section in section_list:
-            if devMode["on"]: print(f"Start: Getting {section} Data")
-
+            # COUNT SQL
             countSQL_key: str = section
-            try:
-                if devMode["on"]: print(f"Start: Getting {section} Count SQL")
 
-                count_SQL = return_countSQL(self.current_route, self.current_user, section)      
-            except:
-                if devMode["on"]: print(f"Error: Getting {section} Count SQL")
-                if devMode["on"]: print(count_SQL)
-            else:
-                if devMode["on"]: print(f"success: Getting {section} Count SQL")
+            count_SQL = return_countSQL(self.current_route, self.current_user, section)      
+            self.countSQL_dict[countSQL_key] = count_SQL
+            
 
-                self.countSQL_dict[countSQL_key] = count_SQL
-            finally:
-                if devMode["on"]: print(f"End: Getting {section} Count SQL")
-                
-            countint_key: str = section
-            try:
-                if devMode["on"]: print(f"Start: Counting {section}")
-                
-                self.cursor.execute(str(self.countSQL_dict[countSQL_key]))
-                count_dict = dict(self.cursor.fetchone())
-                count_int = count_dict[f"{section}_count"]
-                
-            except:
-                if devMode["on"]: print(f"Error: Counting {section}")
-                print(self.countSQL_dict[countSQL_key])
-            else:
-                if devMode["on"]: 
-                    print(f"Success: Counting {section}")
-                    print(count_int)
+            # COUNT INT
+            countInt_key: str = section
 
-                self.countInt_dict[countint_key] = count_int
-            finally:
-                if devMode["on"]: print(f"End: Counting {section}")
+            self.cursor.execute(str(self.countSQL_dict[countSQL_key]))
+            count_dict = dict(self.cursor.fetchone())
+            count_int = count_dict[f"{section}_count"]
+            self.countInt_dict[countInt_key] = count_int
 
+
+
+            # MAX PAGE
             max_page_key: str = section
-            try:
-                if devMode["on"]: print(f"Start: Calculate {section} Max Page")
-                count_int = (self.countInt_dict[countint_key])
-                limit_int = (self.limit)
+            count_int = (self.countInt_dict[countInt_key])
+            limit_int = (self.limit)
+            max_page_int = ceil(count_int/limit_int)
+            self.max_pageInt_dict[max_page_key] = max_page_int
 
-                max_page_int = ceil(count_int/limit_int)
-            except:
-                if devMode["on"]: print(f"Error: Calculate {section} Max Page")
-            else:
-                if devMode["on"]: 
-                    print(f"Success: Calculate {section} Max Page")
-                    print(max_page_int)
 
-                self.max_pageInt_dict[max_page_key] = max_page_int
-            finally:
-                if devMode["on"]: print(f"End: Calculate {section} Max Page")
-
+            # CURRENT PAGE
             current_page_key: str = section
-            try:
-                if devMode["on"]: print(f"Start: Calculate {section} Current Page")
-                input_Page_int = int(self.current_userPageInputs[section])
-                max_page_int = int(self.max_pageInt_dict[max_page_key])
-
-                if input_Page_int > max_page_int:
-                    current_page = max_page_int
-                else:
-                    current_page = input_Page_int
-            except:
-                if devMode["on"]: print(f"Error: Calculate {section} Current Page")
+            input_Page_int = int(self.current_userPageInputs[section])
+            max_page_int = int(self.max_pageInt_dict[max_page_key])
+            if input_Page_int > max_page_int:
+                current_page = max_page_int
             else:
-                if devMode["on"]: 
-                    print(f"Success: Calculate {section} Current Page")
-                    print(current_page)
-                self.current_pageInt_dict[current_page_key] = current_page
-            finally:
-                if devMode["on"]: print(f"End: Calculate {section} Current Page")
+                current_page = input_Page_int
+            self.current_pageInt_dict[current_page_key] = current_page
 
+
+            # OFFSET INT
             offset_key = section
-            try:
-                if devMode["on"]: print(f"Start: Calculate {section} Offset")
-                current_sectionPage_int = int(self.current_pageInt_dict[section])
-                offset_int = int((current_sectionPage_int - 1) * 10)
-            except:
-                if devMode["on"]: print(f"Error: Calculate {section} Offset")
-            else:
-                if devMode["on"]: print(f"Success: Calculate {section} Offset")
-                self.offset_dict[offset_key] = offset_int
-            finally:
-                if devMode["on"]: print(f"End: Calculate {section} Offset")
+            current_sectionPage_int = int(self.current_pageInt_dict[section])
+            offset_int = int((current_sectionPage_int - 1) * 10)
+            self.offset_dict[offset_key] = offset_int
             
             
+
+            # COLUMN SQL
             columnSQL_key = section
-            try:
-                if devMode["on"]: print(f"Start: Getting {section} Column SQL")
 
-                columnSQL = return_columnSQL(self.limit, self.current_route, self.current_user, section, self.offset_dict[section])
-            except:
-                if devMode["on"]: print(f"Error: Getting {section} Column SQL")
-            else:
-                if devMode["on"]: 
-                    print(f"Success: Getting {section} Column SQL")
-                    print(columnSQL)
+            columnSQL = return_columnSQL(self.limit, self.current_route, self.current_user, section, self.offset_dict[section])
+            self.columnSQL_dict[columnSQL_key] = columnSQL
 
-                self.columnSQL_dict[columnSQL_key] = columnSQL
-            finally:
-                if devMode["on"]: print(f"End: Getting {section} Column SQL")
+
+            # COLUMN LIST
+            columns_key: str = section
+
+            self.cursor.execute(self.columnSQL_dict[columnSQL_key])
+            columns_dict = self.cursor.fetchall() 
+            self.columns_dict[columns_key] = columns_dict
             
-            if devMode["on"]: print(f"End: Getting {section} Column SQL")
 
-
-            columns_key = section
-            devLogs: str = f"Querying {section} Columns"
-            try:
-                if devMode["on"]: print(f"Start: {devLogs}")
-
-                self.cursor.execute(self.columnSQL_dict[columnSQL_key])
-                columns_dict = self.cursor.fetchall() 
-            except:
-                if devMode["on"]: print(f"Error: {devLogs}")
-            else:
-                if devMode["on"]: print(f"Success: {devLogs}")
-
-                self.columns_dict[columns_key] = columns_dict
-            finally:
-                if devMode["on"]: print(f"End: {devLogs}")
-            
-            if devMode["on"]: print(f"End: Getting {section} Column SQL")
-
-        if devMode["on"]: print(f"End: Getting {section} Data")
         
         self.public_data = {
             "searches": {
@@ -416,7 +350,6 @@ class Browser:
             },
             "current_user": self.current_user
         }
-
 
 
 

@@ -16,7 +16,11 @@
     border-radius: 10px; 
     background-color: rgb(225 225 225 / 0.3);
 }
-
+.OE-bg-transparent60-white{
+    border: 2px solid white; 
+    border-radius: 10px; 
+    background-color: rgb(225 225 225 / 0.6);
+}
 
 .OE-menu-pagination{
     width: fit-content;
