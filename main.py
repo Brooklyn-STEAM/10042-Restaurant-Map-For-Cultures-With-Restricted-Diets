@@ -1,3 +1,7 @@
+from flask import Flask, render_template, request, redirect, flash
+import pymysql
+from dynaconf import Dynaconf
+import flask_login
 from math import ceil
 def generate_searchBarSQL(searchBar):
     if searchBar:
@@ -325,13 +329,6 @@ class Browser:
             self.public_data["max_pages"][section] = max_page
             self.public_data["curr_pages"][section] = curr_page
             self.public_data["results"][section] = list(results)
-
-
-
-from flask import Flask, render_template, request, redirect, flash
-import pymysql
-from dynaconf import Dynaconf
-import flask_login
 
 app = Flask(__name__) 
 

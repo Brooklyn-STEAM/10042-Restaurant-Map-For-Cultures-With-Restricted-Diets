@@ -53,54 +53,41 @@
           </script>
           
           <script>
-               var results = {{browser_publicData["results"] | tojson}}
-               console.log(results)
-               var searches = {{browser_publicData["results"]["searches"] | tojson}}
-               var favorites = {{browser_publicData["results"]["favorites"] | tojson}}
-               var recommendations = {{browser_publicData["results"]["recommendations"] | tojson}}
 
-
-
-               var map = L.map('map').setView([51.505, -0.09], 13);
-               var vaild_sections = ["recommendations"]
-               if (Boolean(searches)) {
-                    vaild_sections.push("searches")
-               }
-               if (Boolean(favorites)) {
-                    vaild_sections.push("favorites")
-               }
-               console.log(vaild_sections)
-               
-
-
-               for (let section in vaild_sections) {
-                    console.log(section)
-                    console.log(results[section])
-                    for (let restaurant of results[section]) {
-                         const lat = restaurant["lat"]
-                         const lng = restaurant["lng"]
-                         const name = restaurant["name"]
-                         const description = restaurant["description"]
-                         const image = restaurant['image']
-                         console.log(lat)
-                         console.log(lng)
-                         console.log(name)
-                         console.log(description)
-                         console.log(image)
-                         console.log("image")
-
-                         L.marker([lat,lng]).addTo(map)
-                         .bindPopup(`${name} ${description} <img src="${image}" class="card-img-top md" alt="${name}">`)
-                         .openPopup();
-                    }
-               }
-
-
-
-
+               {# function show_markers(section) {
+                    let shown_markers = results[section];
+                    console.log(shown_markers);
+               } #}
+               var map = L.map('map').setView([40.7529, -73.8163], 13);
                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                }).addTo(map);
+
+               const results = {{ browser_publicData["results"] | tojson }};
+
+               {# Load Markers #}
+
+               for (let key in results) {
+                    restoData_list = results[key]
+
+                    if (restoData_list.length > 0) {
+                         for (let key in restoData_list) { 
+                              resto = restoData_list[key]
+    
+                              const lat = Number(resto["lat"])
+                              const lng = Number(resto["lng"])
+                              const name = resto["name"]
+                              const description = resto["description"]
+                              const image = resto['image']
+                              latlng = [lat, lng]
+                              
+                              L.marker(latlng).addTo(map)
+                              .bindPopup(`${name} ${description} <img src="${image}" class="card-img-top md" alt="${name}">`)
+                              .openPopup();
+                         }
+                    }
+
+               }
 
           </script>
 
