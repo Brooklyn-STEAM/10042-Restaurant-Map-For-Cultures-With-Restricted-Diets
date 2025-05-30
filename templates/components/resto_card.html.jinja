@@ -1,7 +1,7 @@
 <article class="OE-card-design-resto card">
     {# Favorite Toggle Buttons #}
     <header class="header-card-topButtons">
-        {% if restaurant["user_id"] == browser_publicData["current_user"]["id"] %}
+        {% if restaurant["user_id"] == browser_publicData["curr_user_id"] %}
             <form action="/restaurant_browser/delete_favorite/{{ restaurant['favorite_restaurants_id'] }}" method="post">
                 <button type="submit" class="btn btn-primary">
                     <img src="/static/images/svgs/heart_filled.svg">

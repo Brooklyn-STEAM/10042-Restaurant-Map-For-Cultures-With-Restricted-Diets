@@ -1,18 +1,16 @@
-{% if browser_publicData["current_user"]["inputs"]["has_searchFilters"] %}
+{% if browser_publicData["given_filter"] %}
     {% set toLoad_sections = ["searches", "favorites", "recommendations"] %}
 {% else %}
     {% set toLoad_sections = ["favorites", "recommendations"] %}
 {% endif %}
 
 <article class="">
-    {% for restoSection in toLoad_sections %}
-        {% with section_data = browser_publicData[restoSection] %}
-
+    {% for section in toLoad_sections %}
         <section class="container mb-3">
             {# Header #}
             <header class="OE-bg-transparent-white">
                 <h2 class="h-1">
-                    {{restoSection.capitalize()}}
+                    {{section.capitalize()}}
                 </h2>
             </header>
 
@@ -20,9 +18,9 @@
                 <figure class="overflow-y-hidden overflow-x-scroll m-0 p-0" style="width:100%">
                     
                     {# Card Group Inner #}
-                    {% if section_data["results"] %}
+                    {% if browser_publicData["results"][section] %}
                         <div class="text-nowrap pt-3 pb-3">
-                            {% for restaurant in list(section_data["results"]) %}
+                            {% for restaurant in browser_publicData["results"][section] %}
                                 {% include "components/resto_card.html.jinja"%}
                             {% endfor %}
                         </div>
@@ -38,38 +36,37 @@
                 <nav class="">
                     <menu class="OE-menu-pagination">
                         <li>
-                            <button class="" onclick="turn_currentPagination(1, '{{ restoSection }}-turnPage-current')">
+                            <button class="" onclick="turn_currentPagination(1, '{{ section }}-turnPage-current')">
                                 1
                             </button>
                         </li>
                         <li>
-                            <button class="" onclick="turn_currentPagination({{ section_data['current_page'] - 1 }}, '{{ restoSection }}-turnPage-current')">
+                            <button class="" onclick="turn_currentPagination({{ browser_publicData['curr_pages'][section] - 1 }}, '{{ section }}-turnPage-current')">
                                 <img src="/static/images/svgs/arrow_left.svg">
                             </button>
                         </li>
 
 
                         <li>
-                            <input class="" type="number" value="{{ section_data['current_page'] }}" 
+                            <input class="" type="number" value="{{ browser_publicData['curr_pages'][section] }}" 
                             name="pagination-{{ group }}" form="searchBar_form">
                         </li>
 
                         <li>
-                            <button class="" onclick="turn_currentPagination({{ section_data['current_page'] + 1 }}, '{{ restoSection }}-turnPage-current')">
+                            <button class="" onclick="turn_currentPagination({{ browser_publicData['curr_pages'][section] + 1 }}, '{{ section }}-turnPage-current')">
                                 <img src="/static/images/svgs/arrow_right.svg">
                             </button>
                         </li>
                         <li>
-                            <button class="" onclick="turn_currentPagination({{ section_data['max_page'] }}, '{{ restoSection }}-turnPage-current')">
-                                {{ section_data['max_page'] }}
+                            <button class="" onclick="turn_currentPagination({{ browser_publicData['max_pages'][section] }}, '{{ section }}-turnPage-current')">
+                                {{ browser_publicData['max_pages'][section] }}
                             </button>
                         </li>
                     </menu>
                 </nav>
             </footer>
-
         </section>
+
         <hr>
-        {% endwith %}
     {% endfor %}
 </article>

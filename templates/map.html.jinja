@@ -17,30 +17,6 @@
           <link rel="stylesheet" href="/static/css/map.css">
           <link rel="stylesheet" href="/static/css/style.css">
      </section>
-     {% set search_input =  
-                    request.args.get('query') 
-                    or 
-                    request.args.get('dietary_restriction_radio') 
-                    or
-                    request.args.get('price_min_filter') 
-                    or 
-                    request.args.get('price_max_filter') 
-     %} {# let the browser know if there was a search #}
-     {% if search_input %}
-          {% set paginationInput_boolean =
-                                        request.args.get('pagination-searchs')|int > 1
-                                        or
-                                        request.args.get('pagination-favorites')|int > 1
-                                        or
-                                        request.args.get('pagination-recommendations')|int > 1
-          %}
-     {% else %}
-          {% set paginationInput_boolean =
-                                        request.args.get('pagination-favorites')|int > 1
-                                        or
-                                        request.args.get('pagination-recommendations')|int > 1
-          %}
-     {% endif %}
 </head>
 <body class="body-map-page">
 
@@ -73,29 +49,58 @@
 
 
      <section id="JavaScript-primaryRepository">
-          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
+          </script>
           
           <script>
+               var results = {{browser_publicData["results"] | tojson}}
+               console.log(results)
+               var searches = {{browser_publicData["results"]["searches"] | tojson}}
+               var favorites = {{browser_publicData["results"]["favorites"] | tojson}}
+               var recommendations = {{browser_publicData["results"]["recommendations"] | tojson}}
+
+
+
                var map = L.map('map').setView([51.505, -0.09], 13);
+               var vaild_sections = ["recommendations"]
+               if (Boolean(searches)) {
+                    vaild_sections.push("searches")
+               }
+               if (Boolean(favorites)) {
+                    vaild_sections.push("favorites")
+               }
+               console.log(vaild_sections)
+               
+
+
+               for (let section in vaild_sections) {
+                    console.log(section)
+                    console.log(results[section])
+                    for (let restaurant of results[section]) {
+                         const lat = restaurant["lat"]
+                         const lng = restaurant["lng"]
+                         const name = restaurant["name"]
+                         const description = restaurant["description"]
+                         const image = restaurant['image']
+                         console.log(lat)
+                         console.log(lng)
+                         console.log(name)
+                         console.log(description)
+                         console.log(image)
+                         console.log("image")
+
+                         L.marker([lat,lng]).addTo(map)
+                         .bindPopup(`${name} ${description} <img src="${image}" class="card-img-top md" alt="${name}">`)
+                         .openPopup();
+                    }
+               }
+
+
+
 
                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                }).addTo(map);
-
-               {% if search_information %}
-                    {% for restaurant in search_information %}
-                         L.marker([{{ restaurant["lat"] }},{{restaurant["lng"]}}]).addTo(map)
-                              .bindPopup(`{{ restaurant["name"]}} {{ restaurant["description"]}} <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">`)
-                              .openPopup();
-                    {% endfor %}
-               {% else %}
-                    {% for restaurant in restaurant_information %}
-                         L.marker([{{ restaurant["lat"] }},{{restaurant["lng"]}}]).addTo(map)
-                              .bindPopup(`{{ restaurant["name"]}} {{ restaurant["description"]}} <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">`)
-                              .openPopup();
-                    {% endfor %}
-               {% endif %}
 
           </script>
 
