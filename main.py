@@ -689,7 +689,6 @@ def map_page():
 
     cursor.close()
     conn.close()
-
     return render_template("map.html.jinja", 
                             browser_publicData = browser_publicData,
                             dietary_restriction_list = dietary_restriction_list)
@@ -698,7 +697,48 @@ def map_page():
 
 @app.route("/contact" , methods=["POST", "GET"])
 def contact_page():
-    return render_template("contact_page.html.jinja")
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    currentUser_id = flask_login.current_user.id
+
+    if request.method == "POST":
+        local_receiver_id = request.form["to"]
+        local_title = request.form["title"]
+        local_message = request.form["message"]
+        # Contacts
+        local_sender_email = request.form["sender_email"]
+        local_sender_phoneNumber = request.form["sender_phoneNumber"]
+        local_sender_address = request.form["sender_address"]
+        local_sender_address_city = request.form["sender_address_city"]
+        local_sender_address_state = request.form["sender_address_state"]
+        local_sender_address_country = request.form["sender_address_country"]
+        local_sender_address_zipCode = request.form["sender_address_zipCode"]
+
+        try:
+            cursor.execute(f"""
+                INSERT INTO `UserCSMessage` 
+                    (`receiver_id`, `title`, `message`,
+                        `email`, `phone_number`, `address`, `city`, `state`, `country`, `zip_code`, `sender_id`) 
+                VALUES 
+                    ('{local_receiver_id}', '{local_title}', '{local_message}', 
+                        '{local_sender_email}', '{local_sender_phoneNumber}','{local_sender_address}','{local_sender_address_city}','{local_sender_address_state}','{local_sender_address_country}','{local_sender_address_zipCode}','{currentUser_id}')
+            """)
+            flash("Thank you for your feedback", "success")
+        except:
+            flash("Sorry, something when wrong with your message", "error")
+
+    cursor.execute(f"""
+        SELECT 
+            `id`, `name`
+        FROM `Restaurant`;
+    """)
+    receiverData_list = cursor.fetchall()
+
+
+    cursor.close()
+    conn.close()
+    return render_template("contact_page.html.jinja", receiverOptions_list = receiverData_list)
 
 @app.route("/about_us" , methods=["POST", "GET"])
 def about_us_page():
