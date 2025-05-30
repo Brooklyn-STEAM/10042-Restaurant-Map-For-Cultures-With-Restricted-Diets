@@ -1,0 +1,13 @@
+<ul class="list-group">
+    {% for message in get_flashed_messages(category_filter=["success"]) %}
+        <li class="alert alert-success" role="alert">
+            {{ message }}
+        </li>
+    {% endfor %}
+
+    {% for message in get_flashed_messages(category_filter=["error"]) %}
+        <li class="alert alert-danger" role="alert">
+            {{ message }}
+        </li>
+    {% endfor %}
+</ul>
