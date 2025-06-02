@@ -17,30 +17,6 @@
           <link rel="stylesheet" href="/static/css/map.css">
           <link rel="stylesheet" href="/static/css/style.css">
      </section>
-     {% set search_input =  
-                    request.args.get('query') 
-                    or 
-                    request.args.get('dietary_restriction_radio') 
-                    or
-                    request.args.get('price_min_filter') 
-                    or 
-                    request.args.get('price_max_filter') 
-     %} {# let the browser know if there was a search #}
-     {% if search_input %}
-          {% set paginationInput_boolean =
-                                        request.args.get('pagination-searchs')|int > 1
-                                        or
-                                        request.args.get('pagination-favorites')|int > 1
-                                        or
-                                        request.args.get('pagination-recommendations')|int > 1
-          %}
-     {% else %}
-          {% set paginationInput_boolean =
-                                        request.args.get('pagination-favorites')|int > 1
-                                        or
-                                        request.args.get('pagination-recommendations')|int > 1
-          %}
-     {% endif %}
 </head>
 <body class="body-map-page">
 
@@ -73,29 +49,45 @@
 
 
      <section id="JavaScript-primaryRepository">
-          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
+          </script>
           
           <script>
-               var map = L.map('map').setView([51.505, -0.09], 13);
 
+               {# function show_markers(section) {
+                    let shown_markers = results[section];
+                    console.log(shown_markers);
+               } #}
+               var map = L.map('map').setView([40.7529, -73.8163], 13);
                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                }).addTo(map);
 
-               {% if search_information %}
-                    {% for restaurant in search_information %}
-                         L.marker([{{ restaurant["lat"] }},{{restaurant["lng"]}}]).addTo(map)
-                              .bindPopup(`{{ restaurant["name"]}} {{ restaurant["description"]}} <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">`)
+               const results = {{ browser_publicData["results"] | tojson }};
+
+               {# Load Markers #}
+
+               for (let key in results) {
+                    restoData_list = results[key]
+
+                    if (restoData_list.length > 0) {
+                         for (let key in restoData_list) { 
+                              resto = restoData_list[key]
+    
+                              const lat = Number(resto["lat"])
+                              const lng = Number(resto["lng"])
+                              const name = resto["name"]
+                              const description = resto["description"]
+                              const image = resto['image']
+                              latlng = [lat, lng]
+                              
+                              L.marker(latlng).addTo(map)
+                              .bindPopup(`${name} ${description} <img src="${image}" class="card-img-top md" alt="${name}">`)
                               .openPopup();
-                    {% endfor %}
-               {% else %}
-                    {% for restaurant in restaurant_information %}
-                         L.marker([{{ restaurant["lat"] }},{{restaurant["lng"]}}]).addTo(map)
-                              .bindPopup(`{{ restaurant["name"]}} {{ restaurant["description"]}} <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">`)
-                              .openPopup();
-                    {% endfor %}
-               {% endif %}
+                         }
+                    }
+
+               }
 
           </script>
 

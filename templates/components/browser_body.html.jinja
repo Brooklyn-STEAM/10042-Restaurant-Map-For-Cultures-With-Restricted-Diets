@@ -1,82 +1,72 @@
-<section class="section-browser-body">
-    <section class="section-browser-searchs">
-        {% if search_results %}
-            <h2>Search Results</h2>
-            <section class="section-card-group">
-                {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
-                    {% include "components/pagination.html.jinja" %}
-                {% endwith%}
-                {% for restaurant in search_results %}
-                    {% with restaurant = restaurant %}
-                            {% include "components/restaurant_card.html.jinja"%}
-                    {% endwith %}
-                {% endfor %}
+{% if browser_publicData["given_filter"] %}
+    {% set toLoad_sections = ["searches", "favorites", "recommendations"] %}
+{% else %}
+    {% set toLoad_sections = ["favorites", "recommendations"] %}
+{% endif %}
+
+<article class="">
+    {% for section in toLoad_sections %}
+        <section class="container mb-3">
+            {# Header #}
+            <header class="OE-bg-transparent-white p-2">
+                <h2 class="h-1">
+                    {{section.capitalize()}}
+                </h2>
+            </header>
+
+            <section class="OE-bg-transparent-white">
+                <figure class="overflow-y-hidden overflow-x-scroll m-0 p-0" style="width:100%">
+                    
+                    {# Card Group Inner #}
+                    {% if browser_publicData["results"][section] %}
+                        <div class="text-nowrap pt-3 pb-3">
+                            {% for restaurant in browser_publicData["results"][section] %}
+                                {% include "components/resto_card.html.jinja"%}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+
+
+                    {% endif %}
+
+                </figure>
             </section>
-        {% elif current_paginationSearchs_int > max_paginationsearchs %}
-            <h2>Search Results</h2>
-            <section class="section-card-group">
-                {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
-                    {% include "components/pagination.html.jinja" %}
-                {% endwith%}
-                <p>You don't have more than {{ max_paginationsearchs }} pages of search results.</p>
-                <p>You are on page {{ current_paginationSearchs_int }} of search results.</p>
-            </section>
-        {% elif search_input %}
-            <h2>Search Results</h2>
-            <section class="section-card-group">
-                {% with group="searchs", current_page = current_paginationSearchs_int, max_page = max_paginationsearchs %}
-                    {% include "components/pagination.html.jinja" %}
-                {% endwith%}
-                <p>No Match</p>                
-            </section>
-        {% endif %}
-    </section>
-    
-    {% if search_input %}
-        <hr>
-    {% endif %}
 
-    <section class="section-browser-favorites">
-        <h2>Favorites</h2>  
-        <section class="section-card-group">
-            {% with group="favorites", current_page = current_paginationFavorites_int, max_page = max_paginationFavorites %}
-                {% include "components/pagination.html.jinja" %}
-            {% endwith%}
-            {% if (favorite_results|length) > 0 %}
-                {% for restaurant in favorite_results %}
-                    {% with restaurant = restaurant %}
-                        {% include "components/restaurant_card.html.jinja"%}
-                    {% endwith %}
-                {% endfor %}
-            {% elif  current_paginationFavorites_int > max_paginationFavorites %}
-                <p>You don't have more than {{ max_paginationFavorites }} pages of favorites.</p>
-                <p>You are on page {{ current_paginationFavorites_int }} of favorites.</p>
-            {% else %}
-                <p>You don't have any Favorites. You can add a favorite by presssing the hearts.</p>
-            {% endif %}      
-        </section>              
-    </section>
+            <footer class="OE-bg-transparent-white p-2">
+                <nav class="">
+                    <menu class="OE-menu-pagination">
+                        <li>
+                            <button class="" onclick="turn_currentPagination(1, '{{ section }}-turnPage-current')">
+                                1
+                            </button>
+                        </li>
+                        <li>
+                            <button class="" onclick="turn_currentPagination({{ browser_publicData['curr_pages'][section] - 1 }}, '{{ section }}-turnPage-current')">
+                                <img src="/static/images/svgs/arrow_left.svg">
+                            </button>
+                        </li>
 
-    <hr>
 
-    <section class="section-browser-recommendations">
+                        <li>
+                            <input class="" type="number" value="{{ browser_publicData['curr_pages'][section] }}" 
+                            name="pagination-{{ group }}" form="searchBar_form">
+                        </li>
 
-        <h2 class="h2-browser-header">Recommendations</h2>
-        <section class="section-card-group">
-            {% with group="recommendations", current_page = current_paginationRecommendations_int, max_page = max_paginationRecommendations %}
-                {% include "components/pagination.html.jinja" %}
-            {% endwith%}
-            {% if recommendation_results|length > 0 %}
-                {% for restaurant in recommendation_results %}
-                    {% with restaurant = restaurant %}
-                        {% include "components/restaurant_card.html.jinja"%}
-                    {% endwith %}
-                {% endfor %}
-            {% elif current_paginationRecommendations_int > max_paginationRecommendations %}
-                <p>There isn't more than {{ max_paginationRecommendations }} pages of recommendations.</p>
-                <p>You are on page {{ current_paginationRecommendations_int }} of recommendations.</p>
-            {% endif %}
+                        <li>
+                            <button class="" onclick="turn_currentPagination({{ browser_publicData['curr_pages'][section] + 1 }}, '{{ section }}-turnPage-current')">
+                                <img src="/static/images/svgs/arrow_right.svg">
+                            </button>
+                        </li>
+                        <li>
+                            <button class="" onclick="turn_currentPagination({{ browser_publicData['max_pages'][section] }}, '{{ section }}-turnPage-current')">
+                                {{ browser_publicData['max_pages'][section] }}
+                            </button>
+                        </li>
+                    </menu>
+                </nav>
+            </footer>
         </section>
-    </section>
 
-</section>
+        <hr>
+    {% endfor %}
+</article>
