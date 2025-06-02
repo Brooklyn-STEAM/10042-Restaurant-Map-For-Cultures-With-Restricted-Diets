@@ -1,93 +1,334 @@
-# '%%' look for stuff between words
-def not_empty(value):
-    if value:
-        return True
-    else:
-        return False
-def empty_value_filter(values):
-    local_values = list(values)
-    
-    filter_results = filter(not_empty, local_values)
-        
-    return filter_results
-
-def search_result_return(cursor, base_restaurant_information_sql):
-    query = request.args.get("query")
-    dietary_restriction_radio = request.args.get("dietary_restriction_radio")
-
-    price_min_filter = request.args.get('price_min_filter')
-    price_max_filter = request.args.get('price_max_filter')
-    exact_price_toggle = request.args.get("exact_price_toggle")
-
-    search_present = False
-
-    if dietary_restriction_radio:
-        search_present = True
-        RestaurantDietaryRestriction_JOIN_sql = """
-                                                JOIN RestaurantDietaryRestriction
-                                                    ON Restaurant.id = RestaurantDietaryRestriction.restaurant_id
-                                                """
-        WHERE_conditions_sql_radio = f"(RestaurantDietaryRestriction.dietary_restriction_id = {dietary_restriction_radio})"
-    else:
-        RestaurantDietaryRestriction_JOIN_sql = ""
-        WHERE_conditions_sql_radio = ""
-
-    if query: 
-        search_present = True
-        WHERE_conditions_sql_query = f"""(
-                                            (`name` LIKE '%{query}%') 
-                                            OR 
-                                            (`address` LIKE '%{query}%')
-                                            OR 
-                                            (`type` LIKE '%{query}%') 
-                                            OR 
-                                            (`description` LIKE '%{query}%') 
-                                            OR 
-                                            (`tags` LIKE '%{query}%')
-                                        )"""
-    else:
-        WHERE_conditions_sql_query = ""
-
-    if price_min_filter:
-        search_present = True
-        if exact_price_toggle:
-            WHERE_conditions_sql_price_min_filter = f"(min_cost = {price_min_filter})"
-        else:
-            WHERE_conditions_sql_price_min_filter = f"(min_cost >= {price_min_filter})"
-    else:
-        WHERE_conditions_sql_price_min_filter = ""
-
-    if price_max_filter:
-        search_present = True
-        if exact_price_toggle:
-            WHERE_conditions_sql_price_max_filter = f"(max_cost = {price_max_filter})"
-        else:
-            WHERE_conditions_sql_price_max_filter = f"(max_cost <= {price_max_filter})"
-    else:
-        WHERE_conditions_sql_price_max_filter = ""
-    
-
-    if search_present:
-        search_WHERE_conditions_sql_list = [WHERE_conditions_sql_radio, 
-                                            WHERE_conditions_sql_query, 
-                                            WHERE_conditions_sql_price_min_filter, 
-                                            WHERE_conditions_sql_price_max_filter]
-        filtered_search_WHERE_conditions_sql_list = empty_value_filter(search_WHERE_conditions_sql_list)
-        search_WHERE_conditions_sql =  " WHERE " + " AND ".join(filtered_search_WHERE_conditions_sql_list)
-        
-        search_restaurant_information_sql = base_restaurant_information_sql + RestaurantDietaryRestriction_JOIN_sql + search_WHERE_conditions_sql + ";"
-        
-        cursor.execute(search_restaurant_information_sql)
-        search_restaurant_results = cursor.fetchall()
-        print(search_restaurant_information_sql)
-        return search_restaurant_results
-    else:
-        return None
-
-from flask import Flask, render_template, request, redirect, flash, abort
+from flask import Flask, render_template, request, redirect, flash
 import pymysql
 from dynaconf import Dynaconf
 import flask_login
+from math import ceil
+def generate_searchBarSQL(searchBar):
+    if searchBar:
+        searchBar_SQL = f"""(
+            (`name` LIKE '%{searchBar}%') 
+            OR 
+            (`address` LIKE '%{searchBar}%')
+            OR 
+            (`type` LIKE '%{searchBar}%') 
+            OR 
+            (`description` LIKE '%{searchBar}%') 
+            OR 
+            (`tags` LIKE '%{searchBar}%')
+        )"""
+        return searchBar_SQL
+    else:
+        return ""
+
+def generate_culturalDietaryRestrictionSQL(cultural_dietaryRestriction):
+    if cultural_dietaryRestriction:
+        cultural_dietaryRestriction_SQL = f"(RestaurantDietaryRestriction.dietary_restriction_id = {cultural_dietaryRestriction})"
+        return cultural_dietaryRestriction_SQL
+    else:
+        return ""
+
+def generate_minPriceFilterSQL(min_price, exact_price):
+    if min_price:
+        if exact_price:
+            minPrice_operator = " = "
+        else:
+            minPrice_operator = " >= "
+
+        min_priceFilter_SQL = f"(min_cost {minPrice_operator} {min_price})"
+    else:
+        min_priceFilter_SQL = ""
+
+    return min_priceFilter_SQL
+    
+def generate_maxPriceFilterSQL(max_price, exact_price):
+    if max_price:
+        if exact_price:
+            maxPrice_operator = " = "
+        else:
+            maxPrice_operator = " <= "
+
+        max_priceFilter_SQL = f"(min_cost {maxPrice_operator} {max_price})"
+    else:
+        max_priceFilter_SQL = ""
+
+    return max_priceFilter_SQL
+
+def generate_dataItemSQL(key, *dataItems) -> str:
+    premadeDIs = {
+        "/restaurant_browser": [
+            "Restaurant.id as restaurant_id",
+            "name", 
+            "type",  
+            "min_cost", 
+            "max_cost", 
+            "image", 
+            "FavoriteRestaurants.id as favorite_restaurants_id",
+            "FavoriteRestaurants.user_id", 
+        ],
+        "/map": [
+            "Restaurant.id as restaurant_id",
+            "name", 
+            "type",  
+            "min_cost", 
+            "max_cost", 
+            "image", 
+            "FavoriteRestaurants.id as favorite_restaurants_id",
+            "FavoriteRestaurants.user_id", 
+            "lng",
+            "lat"
+        ]
+    }
+    base_dataItems = premadeDIs[key]
+
+    base_dataItemSQL_segment = ", \n".join(base_dataItems)
+    if dataItems:
+        inputted_dataItemSQL_segment = ", \n".join(dataItems)
+        dataItem_SQL =  base_dataItemSQL_segment + ", " + inputted_dataItemSQL_segment
+    else:
+        dataItem_SQL = base_dataItemSQL_segment
+
+    return dataItem_SQL
+
+
+
+def generate_selectSQL(section, current_route, mode_count):
+    if mode_count:
+        alias_str: str = f"{section}_count"
+        dataItem_SQL = f"""
+            COUNT(*) AS {alias_str}
+        """            
+    else:    
+        dataItem_SQL = generate_dataItemSQL(current_route)
+
+    select_SQL = f"""
+        SELECT 
+            {dataItem_SQL}
+        FROM Restaurant
+    """
+    return select_SQL
+
+
+def generate_joinSQL(current_user_id, cultural_dietaryRestriction):
+    if cultural_dietaryRestriction:
+        join_SQL = f"""
+            LEFT JOIN FavoriteRestaurants 
+                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                    AND FavoriteRestaurants.user_id = {current_user_id}
+            JOIN RestaurantDietaryRestriction
+                ON Restaurant.id = RestaurantDietaryRestriction.restaurant_id
+
+        """
+    else:
+        join_SQL = f"""
+            LEFT JOIN FavoriteRestaurants 
+                ON Restaurant.id = FavoriteRestaurants.restaurant_id 
+                    AND FavoriteRestaurants.user_id = {current_user_id}
+        """
+
+    return join_SQL
+
+def generate_whereSQL(current_user, section):
+    current_user = current_user
+    current_user_id = current_user["id"]
+    current_userInputs = current_user["inputs"]
+    
+    FishMap_SQL = """
+        Restaurant.id != 0
+    """
+    if section == "searches" and current_userInputs["has_searchFilters"]:
+        searchBar = current_userInputs["searchFilters"]["searchBar"]
+        cultural_dietaryRestriction = current_userInputs["searchFilters"]["cultural_dietaryRestriction"]
+        min_price = current_userInputs["searchFilters"]["min_price"]
+        max_price = current_userInputs["searchFilters"]["max_price"]
+        exact_price = current_userInputs["searchFilters"]["exact_price"]
+
+        searchBar_SQL = generate_searchBarSQL(searchBar)
+        cultural_dietaryRestriction_SQL = generate_culturalDietaryRestrictionSQL(cultural_dietaryRestriction)
+        min_price_SQL = generate_minPriceFilterSQL(min_price, exact_price)
+        max_price_SQL = generate_maxPriceFilterSQL(max_price, exact_price)
+        
+        filterSQL_list = [
+            FishMap_SQL,
+            searchBar_SQL, 
+            cultural_dietaryRestriction_SQL, 
+            min_price_SQL,
+            max_price_SQL
+        ]
+        filter_SQL = " AND ".join(filter(None, filterSQL_list))
+    elif section == "favorites":
+        favOnly_SQL = f"FavoriteRestaurants.user_id = {current_user_id}"
+        
+        filterSQL_list = [
+            FishMap_SQL,
+            favOnly_SQL, 
+        ]
+        filter_SQL = " AND ".join(filter(None, filterSQL_list))
+    else:
+        filter_SQL = FishMap_SQL
+
+    where_SQL = "WHERE" + " " + filter_SQL
+    return where_SQL
+
+def generate_limitSQL(limit, offset, mode_count):
+        if mode_count:
+            filter_SQL = ""
+        else:
+            filter_SQL = f"LIMIT {offset}, {limit}"
+        return filter_SQL
+
+def generate_countSQL(current_route, current_user, section):
+    current_route = current_route
+    current_user = current_user
+    section = section
+
+    mode_count = True
+
+    select_SQL = generate_selectSQL(section, current_route, mode_count)
+    join_SQL = generate_joinSQL(current_user["id"], current_user["inputs"]["searchFilters"]["cultural_dietaryRestriction"])
+    where_SQL = generate_whereSQL(current_user, section)
+
+    countSQL_list = [select_SQL, join_SQL, where_SQL]
+    count_SQL = " ".join(filter(None, countSQL_list)) + ";"
+    print(count_SQL)
+    return count_SQL
+
+def generate_columnSQL(limit, current_route, current_user, section, offset):
+    limit = limit
+    current_route = current_route
+    current_user = current_user
+    section = section
+    offset = offset
+
+    mode_count = False
+
+    select_SQL = generate_selectSQL(section, current_route, mode_count)
+    join_SQL = generate_joinSQL(current_user["id"], current_user["inputs"]["searchFilters"]["cultural_dietaryRestriction"])
+    where_SQL = generate_whereSQL(current_user, section)
+    limit_SQL = generate_limitSQL(limit, offset, mode_count)
+
+    columnSQL_list = [select_SQL, join_SQL, where_SQL, limit_SQL]
+    column_SQL = " ".join(filter(None, columnSQL_list)) + ";"
+    return column_SQL
+
+def generate_currentUser(current_user_id, request):
+    searchBar = request.args.get("query")
+    cultural_dietaryRestriction = request.args.get("dietary_restriction_radio")
+    min_price = request.args.get('price_min_filter')
+    max_price = request.args.get('price_max_filter')
+    exact_price = bool(request.args.get("exact_price_toggle"))
+
+    curr_searchesPagination = request.args.get("pagination-searchs")
+    curr_favoritesPagination = request.args.get("pagination-favorites")
+    curr_recommendationsPagination = request.args.get("pagination-recommendations")
+
+    current_user = {
+        "id": current_user_id,
+        "inputs": {
+            "searchFilters": {
+                "searchBar": searchBar,
+                "cultural_dietaryRestriction": cultural_dietaryRestriction,
+                "min_price": min_price,
+                "max_price": max_price,
+                "exact_price": exact_price,
+            },
+
+            "has_searchFilters": True if searchBar or cultural_dietaryRestriction or min_price or max_price else False,
+
+            "paginations": {
+                "searches": curr_searchesPagination if curr_searchesPagination else "1", # fix spelling
+                "favorites": curr_favoritesPagination if curr_favoritesPagination else "1",
+                "recommendations": curr_recommendationsPagination if curr_recommendationsPagination else "1"
+            }
+        }
+    }
+    return current_user
+
+
+class Browser:
+    def generate_countInt(self, section):
+        section = str(section)
+
+        # COUNT SQL
+        count_SQL = str(generate_countSQL(self.current_route, self.current_user, section))
+        
+        # COUNT INT
+        self.cursor.execute(count_SQL)
+        count_dict = dict(self.cursor.fetchone())
+
+        count_int = count_dict[f"{section}_count"]
+        return int(count_int)
+    
+    def calc_maxPage(self, count_int):
+        # MAX PAGE
+        count_int = int(count_int)
+        
+        limit_int = int(self.limit)
+
+        max_page = ceil(count_int / limit_int)
+        return int(max_page)    
+    
+    def calc_currentPage(self, section, max_page):
+        # CURRENT PAGE
+        section = str(section)
+        max_page = int(max_page)
+
+        input_page = int(self.current_user["inputs"]["paginations"][section])
+
+        if input_page > max_page:
+            current_page = max_page
+        else:
+            current_page = input_page
+        
+        return int(current_page)
+    
+    def calc_offsetInt(self, current_page):
+        # OFFSET INT
+        offset_int = (current_page - 1) * 10
+        return int(offset_int)
+    
+    def generate_results(self, section, offset_int):
+        # COLUMN SQL
+        results_SQL = str(generate_columnSQL(self.limit, self.current_route, self.current_user, section, offset_int))
+
+        # COLUMN LIST
+        self.cursor.execute(results_SQL)
+        results_list = self.cursor.fetchall() 
+        return list(results_list)
+
+    def __init__(self, current_user_id: int, request: object, cursor: object, limit: int):
+        self.current_route = request.path
+        self.current_user = generate_currentUser(current_user_id, request)
+
+        self.cursor = cursor
+        self.limit = limit
+
+        self.public_data = {
+            "counts": {"searches": int, "favorites": int, "recommendations": int},
+            "max_pages": {"searches": int, "favorites": int, "recommendations": int},
+            "curr_pages": {"searches": int, "favorites": int, "recommendations": int},
+            "results": {"searches": [], "favorites": [], "recommendations": []},
+            "given_filter": bool(self.current_user["inputs"]["has_searchFilters"]),
+            "curr_user_id": current_user_id
+        }
+
+
+        section_list = ["recommendations"]
+        if self.current_user["inputs"]["has_searchFilters"]:
+            section_list += ["searches"]
+        if self.current_user["id"]:
+            section_list += ["favorites"]
+
+        for section in section_list:
+            count_int = self.generate_countInt(section)
+            max_page = self.calc_maxPage(count_int)
+            curr_page = self.calc_currentPage(section, max_page)
+            offset_int = self.calc_offsetInt(curr_page)
+            results = self.generate_results(section, offset_int)
+
+            self.public_data["counts"][section] = count_int
+            self.public_data["max_pages"][section] = max_page
+            self.public_data["curr_pages"][section] = curr_page
+            self.public_data["results"][section] = list(results)
 
 app = Flask(__name__) 
 
@@ -254,47 +495,24 @@ def sign_out():
 def restaurant_browser():
     conn = connect_db()
     cursor = conn.cursor()
+    
     current_user_id = flask_login.current_user.id
     
-    base_restaurant_information_sql = f"""
-                SELECT Restaurant.id as restaurant_id,
-                        name, 
-                        type,  
-                        min_cost, 
-                        max_cost, 
-                        image, 
-                        FavoriteRestaurants.id as favorite_restaurants_id,
-                        FavoriteRestaurants.user_id 
-                FROM Restaurant 
-                LEFT JOIN FavoriteRestaurants 
-                    ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                        AND FavoriteRestaurants.user_id = {current_user_id}
-                """
-    
-    search_information = search_result_return(cursor, base_restaurant_information_sql)
+    current_browser = Browser(current_user_id, request, cursor, 10)
+    browser_publicData = current_browser.public_data
 
-    # Favorite + Recommendation
-    cursor.execute(base_restaurant_information_sql + ";")
-    restaurant_information = cursor.fetchall()
 
     # Dietary Restriction
     cursor.execute("SELECT * FROM DietaryRestriction")
     dietary_restriction_list = cursor.fetchall()
 
+
     cursor.close()
     conn.close()
 
-    user_favorite_present = ""
-    for restaurant in restaurant_information:
-        if restaurant["user_id"] == current_user_id:
-            user_favorite_present = "yes"
-            break        
-
     return render_template("restaurant_browser_page.html.jinja", 
-                           restaurant_information = restaurant_information,
-                           search_information = search_information, 
-                           dietary_restriction_list = dietary_restriction_list,
-                           user_favorite_present = user_favorite_present)
+                            browser_publicData = browser_publicData,
+                            dietary_restriction_list = dietary_restriction_list)
 
 @app.route('/restaurant_browser/insert_favorite/<restaurant_id>', methods=["POST", "GET"])
 @flask_login.login_required
@@ -457,55 +675,70 @@ def restaurant_review_update(restaurant_id):
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
+    
     current_user_id = flask_login.current_user.id
     
-    base_restaurant_information_sql = f"""
-                SELECT Restaurant.id as restaurant_id,
-                        name, 
-                        type, 
-                        min_cost, 
-                        max_cost, 
-                        image, 
-                        lng, 
-                        lat, 
-                        FavoriteRestaurants.id as favorite_restaurants_id,
-                        FavoriteRestaurants.user_id 
-                FROM Restaurant 
-                LEFT JOIN FavoriteRestaurants 
-                    ON Restaurant.id = FavoriteRestaurants.restaurant_id 
-                        AND FavoriteRestaurants.user_id = {current_user_id}
-                """
-    
-    search_information = search_result_return(cursor, base_restaurant_information_sql)
+    current_browser = Browser(current_user_id, request, cursor, 10)
+    browser_publicData = current_browser.public_data
 
-    # Favorite + Recommendation
-    cursor.execute(base_restaurant_information_sql + ";")
-    restaurant_information = cursor.fetchall()
 
     # Dietary Restriction
     cursor.execute("SELECT * FROM DietaryRestriction")
     dietary_restriction_list = cursor.fetchall()
 
+
     cursor.close()
     conn.close()
-
-    user_favorite_present = ""
-    for restaurant in restaurant_information:
-        if restaurant["user_id"] == current_user_id:
-            user_favorite_present = "yes"
-            break        
-
     return render_template("map.html.jinja", 
-                           restaurant_information = restaurant_information,
-                           search_information = search_information, 
-                           dietary_restriction_list = dietary_restriction_list,
-                           user_favorite_present = user_favorite_present)
+                            browser_publicData = browser_publicData,
+                            dietary_restriction_list = dietary_restriction_list)
 
 
 
 @app.route("/contact" , methods=["POST", "GET"])
 def contact_page():
-    return render_template("contact_page.html.jinja")
+    conn = connect_db()
+    cursor = conn.cursor()
+
+    currentUser_id = flask_login.current_user.id
+
+    if request.method == "POST":
+        local_receiver_id = request.form["to"]
+        local_title = request.form["title"]
+        local_message = request.form["message"]
+        # Contacts
+        local_sender_email = request.form["sender_email"]
+        local_sender_phoneNumber = request.form["sender_phoneNumber"]
+        local_sender_address = request.form["sender_address"]
+        local_sender_address_city = request.form["sender_address_city"]
+        local_sender_address_state = request.form["sender_address_state"]
+        local_sender_address_country = request.form["sender_address_country"]
+        local_sender_address_zipCode = request.form["sender_address_zipCode"]
+
+        try:
+            cursor.execute(f"""
+                INSERT INTO `UserCSMessage` 
+                    (`receiver_id`, `title`, `message`,
+                        `email`, `phone_number`, `address`, `city`, `state`, `country`, `zip_code`, `sender_id`) 
+                VALUES 
+                    ('{local_receiver_id}', '{local_title}', '{local_message}', 
+                        '{local_sender_email}', '{local_sender_phoneNumber}','{local_sender_address}','{local_sender_address_city}','{local_sender_address_state}','{local_sender_address_country}','{local_sender_address_zipCode}','{currentUser_id}')
+            """)
+            flash("Thank you for your feedback", "success")
+        except:
+            flash("Sorry, something when wrong with your message", "error")
+
+    cursor.execute(f"""
+        SELECT 
+            `id`, `name`
+        FROM `Restaurant`;
+    """)
+    receiverData_list = cursor.fetchall()
+
+
+    cursor.close()
+    conn.close()
+    return render_template("contact_page.html.jinja", receiverOptions_list = receiverData_list)
 
 @app.route("/about_us" , methods=["POST", "GET"])
 def about_us_page():

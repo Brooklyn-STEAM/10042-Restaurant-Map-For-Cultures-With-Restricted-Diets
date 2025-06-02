@@ -1,76 +1,81 @@
-<form name="search_bar_form" action="{{ current_route }}" class="container" style="background-color: white;">
-    <section class="input-group {% if current_route == '/restaurant_browser' %}mb-3{% endif %}">
+
+<form class="accordion" id="form-searchBar" action="{{ current_route }}" style="background-color: lightblue;">
+    <div class="accordion-item bg-transparent">
+      <h2 class="accordion-header input-group">
         <input id="restaurantBrowserSearchBar" type="text" name="query" class="form-control" placeholder="Search..." aria-label="Search..." value="{{ request.args.get('query', '') }}">
         <input class="btn btn-outline-secondary" onclick="clearSearchBar()" type="button" value="X">
         <button class="btn btn-outline-secondary" type="submit">Search</button>
         
-        <button class="" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleFilter" aria-expanded="true" aria-controls="collapsibleFilter">
+        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleFilters" aria-expanded="true" aria-controls="collapsibleFilters">
             <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
                 <path d="M0 5.5h15m-15-4h15m-15 8h15m-15 4h15" stroke="currentColor"></path>
             </svg>
         </button>
-    </section>
+      </h2>
+      <div id="collapsibleFilters" class="accordion-collapse collapse" data-bs-parent="#form-searchBar">
+        <div class="accordion-body OE-bg-transparent60-white p-2">
+            {# Cultural Dietary Restriction #}
+            <section>
+                <div>
+                    <h5>
+                    Cultural Dietary Restriction
+                    <span>
+                        <input class="btn btn-outline-secondary" onclick="clearCulturalDietaryRestrictionRadio()" type="button" value="X">
+                    </span>
+                    </h5>
+                </div>
+                {% for dietary_restriction in dietary_restriction_list %}
+                    <div class="filter-opition">
+                        {% if request.args.get('dietary_restriction_radio') == dietary_restriction['id']|string %}
+                            <input class="form-check-input filter-radio" type="radio" 
+                                name="dietary_restriction_radio" 
+                                id="dietary_restriction_{{ dietary_restriction['name'] }}" 
+                                value="{{ dietary_restriction['id'] }}" checked>
+                        {% else %}
+                            <input class="form-check-input filter-radio" type="radio" 
+                                name="dietary_restriction_radio" 
+                                id="dietary_restriction_{{ dietary_restriction['name'] }}" 
+                                value="{{ dietary_restriction['id'] }}">
+                        {% endif %}
+                        <label class="form-check-label" for="dietary_restriction_{{ dietary_restriction['name'] }}">
+                            <abbr title="{{ dietary_restriction['description'] }}">
+                                {{ dietary_restriction["name"] }}
+                            </abbr>
+                        </label>
+                    </div>
+                {% endfor %}      
+            </section>
 
-    <section id="collapsibleFilter" class="filter-accordion-body collapse">
-        <section>
-            <div>
+            <section>
                 <h5>
-                Cultural Dietary Restriction
+                Prices
                 <span>
-                    <input class="btn btn-outline-secondary" onclick="clearCulturalDietaryRestrictionRadio()" type="button" value="X">
+                    <input class="btn btn-outline-secondary" onclick="clearPriceFilterSettings()" type="button" value="X">
                 </span>
-                </h5>
-            </div>
-            {% for dietary_restriction in dietary_restriction_list %}
-                <div class="filter-opition">
-                    {% if request.args.get('dietary_restriction_radio') == dietary_restriction['id']|string %}
-                        <input class="form-check-input filter-radio" type="radio" 
-                            name="dietary_restriction_radio" 
-                            id="dietary_restriction_{{ dietary_restriction['name'] }}" 
-                            value="{{ dietary_restriction['id'] }}" checked>
+                </h3>
+                <div class="input-group">
+                    <span class="input-group-text" id="price_min_filter_label">Min</span>
+                    <input class ="price-filter" type="number" name="price_min_filter" value="{{ request.args.get('price_min_filter', '') }}">
+                    
+                    <span class="input-group-text" id="price_min_filter_label">Max</span>
+                    <input class ="price-filter" type="number" name="price_max_filter" value="{{ request.args.get('price_max_filter', '') }}">
+                </div>
+                <div class="form-check">
+                    {% if request.args.get('exact_price_toggle') %}
+                        <input name = "exact_price_toggle" class="form-check-input" type="checkbox" value="1" id="exact_price_toggle_checkBox" checked>
                     {% else %}
-                        <input class="form-check-input filter-radio" type="radio" 
-                            name="dietary_restriction_radio" 
-                            id="dietary_restriction_{{ dietary_restriction['name'] }}" 
-                            value="{{ dietary_restriction['id'] }}">
+                        <input name = "exact_price_toggle" class="form-check-input" type="checkbox" value="1" id="exact_price_toggle_checkBox">
                     {% endif %}
-                    <label class="form-check-label" for="dietary_restriction_{{ dietary_restriction['name'] }}">
-                        <abbr title="{{ dietary_restriction['description'] }}">
-                            {{ dietary_restriction["name"] }}
-                        </abbr>
+                    <label class="form-check-label" for="exact_price_toggle_checkBox">
+                        Exact Prices
                     </label>
                 </div>
-            {% endfor %}    
-        </section>
+            </section>
 
-        <section>
-            <h5>
-            Prices
-            <span>
-                <input class="btn btn-outline-secondary" onclick="clearPriceFilterSettings()" type="button" value="X">
-            </span>
-            </h3>
-            <div class="input-group mb-3">
-                <span class="input-group-text" id="price_min_filter_label">Min</span>
-                <input class ="price-filter" type="number" name="price_min_filter" value="{{ request.args.get('price_min_filter', '') }}">
-                
-                <span class="input-group-text" id="price_min_filter_label">Max</span>
-                <input class ="price-filter" type="number" name="price_max_filter" value="{{ request.args.get('price_max_filter', '') }}">
-            </div>
-            <div class="form-check">
-                {% if request.args.get('exact_price_toggle') %}
-                    <input name = "exact_price_toggle" class="form-check-input" type="checkbox" value="1" id="exact_price_toggle_checkBox" checked>
-                {% else %}
-                    <input name = "exact_price_toggle" class="form-check-input" type="checkbox" value="1" id="exact_price_toggle_checkBox">
-                {% endif %}
-                <label class="form-check-label" for="exact_price_toggle_checkBox">
-                    Exact Prices
-                </label>
-            </div>
-        </section>
-
-        <section>
-            <input type="button" onclick="clearAllFilters()" value="Clear All">
-        </section>
-    </section>
+            <section>
+                <input type="button" onclick="clearAllFilters()" value="Clear All">
+            </section>
+        </div>
+      </div>
+    </div>
 </form>

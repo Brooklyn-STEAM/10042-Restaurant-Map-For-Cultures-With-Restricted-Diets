@@ -12,9 +12,10 @@
           <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
                integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
+          <link rel="stylesheet" href="/static/css/card.css">
+          <link rel="stylesheet" href="/static/css/pagination.css">
           <link rel="stylesheet" href="/static/css/map.css">
           <link rel="stylesheet" href="/static/css/style.css">
-          <link rel="stylesheet" href="/static/css/card.css">
      </section>
 </head>
 <body class="body-map-page">
@@ -31,14 +32,12 @@
                     {% with current_route = "/map"%}
                          {% include "components/search_bar.html.jinja" %}
                     {% endwith %}
-                    <button id="accordion-miniBrowser-toogleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-miniBrowser" aria-expanded="true" aria-controls="collapseOne">
-                         <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" width="15" height="15">
-                              <path d="M14 5l-6.5 7L1 5" stroke="currentColor" stroke-linecap="square"></path>
-                         </svg>                         
+                    <button id="accordion-miniBrowser-toogleBtn" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-miniBrowser" aria-expanded="true" aria-controls="collapseOne" onclick="change_accordionToggleIcon('accordion-miniBrowser-toogleBtn', 'miniBroswerAccordionToggleIcon_id')">
+                         <img id="miniBroswerAccordionToggleIcon_id" src="/static/images/svgs/arrow_down.svg">                       
                     </button>
                </header>
 
-               <div id="accordion-miniBrowser" class="accordion-collapse collapse show">
+               <div id="accordion-miniBrowser" class="accordion-collapse collapse {% if search_input or paginationInput_boolean %}show{% endif %}">
                     {% include "components/browser_body.html.jinja" %}
                </div>
 
@@ -47,36 +46,48 @@
           <div id="map"></div>
      
      </main>
-          
-     <footer>
-     
-     </footer>
 
 
      <section id="JavaScript-primaryRepository">
-          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-                    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
+          </script>
           
           <script>
-               var map = L.map('map').setView([51.505, -0.09], 13);
 
+               {# function show_markers(section) {
+                    let shown_markers = results[section];
+                    console.log(shown_markers);
+               } #}
+               var map = L.map('map').setView([40.7529, -73.8163], 13);
                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                }).addTo(map);
 
-               {% if search_information %}
-                    {% for restaurant in search_information %}
-                         L.marker([{{ restaurant["lat"] }},{{restaurant["lng"]}}]).addTo(map)
-                              .bindPopup(`{{ restaurant["name"]}} {{ restaurant["description"]}} <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">`)
+               const results = {{ browser_publicData["results"] | tojson }};
+
+               {# Load Markers #}
+
+               for (let key in results) {
+                    restoData_list = results[key]
+
+                    if (restoData_list.length > 0) {
+                         for (let key in restoData_list) { 
+                              resto = restoData_list[key]
+    
+                              const lat = Number(resto["lat"])
+                              const lng = Number(resto["lng"])
+                              const name = resto["name"]
+                              const description = resto["description"]
+                              const image = resto['image']
+                              latlng = [lat, lng]
+                              
+                              L.marker(latlng).addTo(map)
+                              .bindPopup(`${name} ${description} <img src="${image}" class="card-img-top md" alt="${name}">`)
                               .openPopup();
-                    {% endfor %}
-               {% else %}
-                    {% for restaurant in restaurant_information %}
-                         L.marker([{{ restaurant["lat"] }},{{restaurant["lng"]}}]).addTo(map)
-                              .bindPopup(`{{ restaurant["name"]}} {{ restaurant["description"]}} <img src="{{restaurant['image']}}" class="card-img-top md" alt="{{restaurant['name']}}">`)
-                              .openPopup();
-                    {% endfor %}
-               {% endif %}
+                         }
+                    }
+
+               }
 
           </script>
 
