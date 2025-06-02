@@ -1,111 +1,134 @@
-.filter-opition{
+.filter-opition {
+  display: inline-block;
+  width: 250px;
+  margin-right: 10%;
+}
+
+.filter-accordion-body {
+  border: 1px solid black;
+}
+
+#miniBrowserCollapser_buttonId {
+  background-color: transparent;
+  border: none;
+  width: 100%;
+}
+
+
+.categoryOfRestaurantCards {
+  height: 75vmin;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  white-space: nowrap;
+
+  &>.card {
     display: inline-block;
-    width: 250px;
-    margin-right: 10%;
-}
-.filter-accordion-body{
-    border: 1px solid black;
-}
-
-#miniBrowserCollapser_buttonId{
-    background-color: transparent;
-    border: none;
-    width: 100%;
-}
+    max-width: 100vw;
+    max-height: 100vh;
+    height: 100%;
+    aspect-ratio: 1 / 2;
+    background-color: rgb(161, 206, 235);
 
 
-.categoryOfRestaurantCards{
-    height: 75vmin;
-    overflow-y: hidden;
-    overflow-x: scroll;
-    white-space: nowrap;
-    & > .card{
-        display: inline-block;
-        max-width: 100vw;
-        max-height: 100vh;
-        height: 100%; 
-        aspect-ratio: 1 / 2;
-        background-color: rgb(161, 206, 235);
-        
-        
-        & > .header-card-topButtons{
-            max-height: 45px;
-            height: 10%;
-            
-            
-            & *{
-                height: 100%;
-                width: auto;
-                aspect-ratio: 1 / 1;
-            };
-        };
-        
-        & > .a-card-main{
-            height: 90%;
-            aspect-ratio: 1 / 2;
-            
-            
-            & > .sections-card-imgsBox{
-                height: 50%;
-                aspect-ratio: 1 / 1;
-          }
+    &>.header-card-topButtons {
+      max-height: 45px;
+      height: 10%;
+
+
+      & * {
+        height: 100%;
+        width: auto;
+        aspect-ratio: 1 / 1;
       }
-  }
-}
-      
-#nav-primary{
-    background-image: url("../images/navbar_background.png");
 
-
-    & li:hover{
-        background-color: lightcyan;
-
+      ;
     }
 
-    & li{
-        padding: 1rem;
-    } 
+    ;
+
+    &>.a-card-main {
+      height: 90%;
+      aspect-ratio: 1 / 2;
+
+
+      &>.sections-card-imgsBox {
+        height: 50%;
+        aspect-ratio: 1 / 1;
+      }
+    }
+  }
+}
+
+#nav-primary {
+  background-color:		#ace9e7 ;
+
+
+  & li:hover {
+    background-color: lightcyan;
+
+  }
+
+  & li {
+    padding: 1rem;
+  }
 
 }
-.account-dropdown li{
-    padding: 0rem !important;
+
+.account-dropdown li {
+  padding: 0rem !important;
 }
 
 .wrapper {
-    height: 100vh;
-    /*This part is important for centering*/
-    display: grid;
-    place-items: center;
+  height: 100vh;
+  /*This part is important for centering*/
+  display: grid;
+  place-items: center;
+}
+
+.typing-demo {
+  width: 22ch;
+  animation: typing 2s steps(22), blink .5s step-end infinite alternate;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid;
+  font-family: "Jaro";
+  font-size: 2em;
+}
+
+@keyframes typing {
+  from {
+    width: 0
   }
-  
-  .typing-demo {
-    width: 22ch;
-    animation: typing 2s steps(22), blink .5s step-end infinite alternate;
-    white-space: nowrap;
-    overflow: hidden;
-    border-right: 3px solid;
-    font-family: monospace;
-    font-size: 2em;
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent
   }
-  
-  @keyframes typing {
-    from {
-      width: 0
-    }
-  }
-      
-  @keyframes blink {
-    50% {
-      border-color: transparent
-    }
-  }
-  
-  body {
-    text-align: center;
-  }
-  
-  .info {
-    position: absolute;
-    bottom: 0;
-    padding: 20px;
-  }
+}
+
+body {
+  text-align: center;
+}
+
+.info {
+  position: absolute;
+  bottom: 0;
+  padding: 20px;
+}
+
+.hero {
+  position: relative;
+}
+
+.hero > .wrapper {
+  position: absolute;
+  inset: 0;
+  top: -50px;
+}
+
+nav {
+  z-index: 99;
+}
+
+
