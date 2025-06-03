@@ -4,16 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon " type="x-icon" href="/static/images/Untitled (2).png">
     <title>Sign Up</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         herf="style.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
         crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/style.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  
 
 
     <style>
         body {
             background-image: url('/static/background.png');
+        }
+
+
+        .ball {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, .2);
+            backdrop-filter: blur(10px);
         }
     </style>
 </head>
@@ -27,48 +38,50 @@
     </div>
     {% endfor %}
 
-    <div class="container-sm col-3  rounded p-5 bg-white ">
+    <div
+        class=" ball container   col-3  rounded-0  position-absolute top-100 start-50 translate-middle p-5  shadow-lg p-3 mb-5  animate__animated animate__fadeIn animate__slower blur ">
         <form action="/sign_up" method="post">
             <div class="sm-3">
                 <h2>Sign Up to Dish Map</h2>
                 <label class="form-label" id="basic-addon1">First Name</label>
-                <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="text" class=" ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="first_name" required value="{{ request.form.get('first_name', '') }}">
+
                 <label class="form-label" id="basic-addon1">Middle Name</label>
-                <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="text" class="ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="middle_name" value="{{ request.form.get('middle_name', '') }}">
                 <label class="form-label" id="basic-addon1">Last Name</label>
-                <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="text" class="ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="last_name" required value="{{ request.form.get('last_name', '') }}">
             </div>
             <div class=" mb-3">
                 <label class="form-label" id="basic-addon1">Preferred Name</label>
-                <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="text" class=" ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="preferred_name" value="{{ request.form.get('preferred_name', '') }}">
             </div>
             <div class=" mb-3">
                 <label class="form-label" id="basic-addon1">Email</label>
-                <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="text" class=" ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="email" required value="{{ request.form.get('email', '') }}">
             </div>
             <div class="mb-3">
                 <label class="form-label" id="basic-addon1">Password</label>
-                <input type="password" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="password" class=" ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="password" requried>
             </div>
             <div class=" mb-3">
                 <label class="form-label" id="basic-addon1">Confirm Password</label>
-                <input type="password" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="password" class=" ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="confirm_password" required>
             </div>
             <div class=" mb-3">
                 <label class="form-label" id="basic-addon1">Phone Number</label>
-                <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="text" class="ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="phone_number" value="{{ request.form.get('phone_number', '') }}">
             </div>
             <div class=" mb-3">
                 <label class="form-label" id="basic-addon1">Address</label>
-                <input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                <input type="text" class=" ball form-control" aria-label="Username" aria-describedby="basic-addon1"
                     name="address" value="{{ request.form.get('address', '') }}">
             </div>
             {# <div class="mb-3">
@@ -78,7 +91,8 @@
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
-            <p>already have an account with us?</p><p><a href="/sign_in" class="link-underline-primary">sign in</a></p>
+            <p>already have an account with us?</p>
+            <p><a href="/sign_in" class="link-underline-primary">sign in</a></p>
 
         </form>
     </div>
