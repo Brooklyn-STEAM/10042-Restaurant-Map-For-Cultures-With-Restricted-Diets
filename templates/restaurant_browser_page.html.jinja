@@ -12,15 +12,6 @@
         <link rel="stylesheet" href="static/css/browser.css">
         <link rel="stylesheet" href="static/css/style.css">
     </section>
-    {% set search_input =  
-                    request.args.get('query') 
-                    or 
-                    request.args.get('dietary_restriction_radio') 
-                    or
-                    request.args.get('price_min_filter') 
-                    or 
-                    request.args.get('price_max_filter') 
-    %} {# let the browser know if there was a search #}
 </head>
 <body class="OE-bg-img-cloudly-blue">
     <header class="header-nav-container">
