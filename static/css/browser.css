@@ -1,14 +1,14 @@
-/* Resto Card */
+/* ANCHOR - Resto Card */
 .OE-card-design-resto{
     display: inline-block;
     width: 18rem;
     max-height: fit-content;
   }
 
-/* Resto Card Groups*/
+/* ANCHOR - Resto Card Groups*/
 
 
-/* Pagination */
+/* ANCHOR - Pagination */
 .OE-menu-pagination{
     width: fit-content;
     height: 100%;
@@ -58,17 +58,17 @@
     }
 }
 
-/* Search Bar */
+/* ANCHOR - Search Bar */
 .filter-opition {
     display: inline-block;
     width: 250px;
     margin-right: 10%;
 }
 
-/* Mini Browser */
+/* ANCHOR - Mini Browser */
+/* Not dealing with this right now */
 
-
-/* Images */
+/* ANCHOR - Images */
 .OE-img{
     &.img-resto{
         width: 100%;
