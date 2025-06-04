@@ -64,7 +64,7 @@
           <div id="map"></div>
      </main>
 
-
+<a href="#"></a>
      <section id="JavaScript-primaryRepository">
           <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="">
           </script>
@@ -95,10 +95,11 @@
                               const lng = Number(resto["lng"])
                               const name = resto["name"]
                               const image = resto['image']
+                              const resto_id = resto['restaurant_id']
                               latlng = [lat, lng]
                               
                               L.marker(latlng).addTo(map)
-                              .bindPopup(`${name} <img src="${image}" class="card-img-top md" alt="${name}">`)
+                              .bindPopup(`<a href='#restoCard-${key}-${resto_id}'>${name} <img src="${image}" class="card-img-top md" alt="${name}"></a>`)
                               .openPopup();
                          }
                     }

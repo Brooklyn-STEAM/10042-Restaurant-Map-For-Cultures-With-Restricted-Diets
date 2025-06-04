@@ -1,4 +1,4 @@
-<article class="OE-card-design-resto card">
+<article class="OE-card-design-resto card" id="restoCard-{{ section }}-{{ restaurant['restaurant_id'] }}">
     {# Favorite Toggle Buttons #}
     <header class="header-card-topButtons">
         {% if restaurant["user_id"] == browser_publicData["curr_user_id"] %}
