@@ -94,12 +94,11 @@
                               const lat = Number(resto["lat"])
                               const lng = Number(resto["lng"])
                               const name = resto["name"]
-                              const description = resto["description"]
                               const image = resto['image']
                               latlng = [lat, lng]
                               
                               L.marker(latlng).addTo(map)
-                              .bindPopup(`${name} ${description} <img src="${image}" class="card-img-top md" alt="${name}">`)
+                              .bindPopup(`${name} <img src="${image}" class="card-img-top md" alt="${name}">`)
                               .openPopup();
                          }
                     }
