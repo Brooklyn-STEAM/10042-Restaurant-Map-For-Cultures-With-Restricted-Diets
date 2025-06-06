@@ -47,7 +47,7 @@ def generate_maxPriceFilterSQL(max_price, exact_price):
         else:
             maxPrice_operator = " <= "
 
-        max_priceFilter_SQL = f"(min_cost {maxPrice_operator} {max_price})"
+        max_priceFilter_SQL = f"(max_cost {maxPrice_operator} {max_price})"
     else:
         max_priceFilter_SQL = ""
 
@@ -283,13 +283,17 @@ class Browser:
     
     def calc_offsetInt(self, current_page):
         # OFFSET INT
-        offset_int = (current_page - 1) * 10
+        pageM1 = current_page - 1
+        if pageM1 < 0:
+            pageM1 = 0
+        offset_int = pageM1 * 10
         return int(offset_int)
     
     def generate_results(self, section, offset_int):
         # COLUMN SQL
         results_SQL = str(generate_columnSQL(self.limit, self.current_route, self.current_user, section, offset_int))
-
+        print("jmmm")
+        print(f"results_SQL: {results_SQL}")
         # COLUMN LIST
         self.cursor.execute(results_SQL)
         results_list = self.cursor.fetchall() 

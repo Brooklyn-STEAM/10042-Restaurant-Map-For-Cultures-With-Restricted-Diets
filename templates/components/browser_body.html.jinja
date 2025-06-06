@@ -25,8 +25,15 @@
                             {% endfor %}
                         </div>
                     {% else %}
-
-
+                        {% if section == "searches" %}
+                            <div class="text-nowrap pt-3 pb-3">
+                                <p>Your search has no results.</p>
+                            </div>
+                        {% elif section == "favorites" %}
+                            <div class="text-nowrap pt-3 pb-3">
+                                <p>You have no favorites.</p>
+                            </div>
+                        {% endif %}
                     {% endif %}
 
                 </figure>
