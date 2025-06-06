@@ -87,4 +87,19 @@ nav {
   z-index: 99;
 }
 
+.jaro {
+  font-family: "Jaro", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+.my-font {
+  font-family: "Jaro";
+}
 
+
+/* footer {
+  padding: 24px;
+  background-color: rgb(177, 213, 236);
+  position: static;
+} */
