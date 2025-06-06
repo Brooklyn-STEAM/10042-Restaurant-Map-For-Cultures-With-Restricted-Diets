@@ -762,3 +762,4 @@ def contact_page():
     #     result = cursor.fetchone()
 #     cursor.close()
 #     conn.close()
+
