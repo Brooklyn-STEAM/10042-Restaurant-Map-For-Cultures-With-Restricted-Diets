@@ -9,7 +9,7 @@
         <section class="container mb-3">
             {# Header #}
             <header class="OE-bg-transparent-white p-2">
-                <h2 class="h-1">
+                <h2 id="h2-{{ section }}" class="h-1">
                     {{section.capitalize()}}
                 </h2>
             </header>
@@ -33,7 +33,7 @@
             </section>
 
             <footer class="OE-bg-transparent-white p-2">
-                <nav class="">
+                <nav>
                     <menu class="OE-menu-pagination">
                         <li>
                             <button class="" onclick="turn_currentPagination(1, '{{ section }}-turnPage-current')">
