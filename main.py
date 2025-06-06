@@ -676,6 +676,7 @@ def restaurant_review_update(restaurant_id):
 
 
 @app.route("/map" , methods=["POST", "GET"])
+@flask_login.login_required
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
@@ -700,6 +701,7 @@ def map_page():
 
 
 @app.route("/contact" , methods=["POST", "GET"])
+@flask_login.login_required
 def contact_page():
     conn = connect_db()
     cursor = conn.cursor()
