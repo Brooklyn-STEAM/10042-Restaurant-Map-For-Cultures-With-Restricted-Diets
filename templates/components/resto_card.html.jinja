@@ -1,4 +1,4 @@
-<article class="OE-card-design-resto card">
+<article class="OE-card-design-resto card" id="restoCard-{{ section }}-{{ restaurant['restaurant_id'] }}">
     {# Favorite Toggle Buttons #}
     <header class="header-card-topButtons">
         {% if restaurant["user_id"] == browser_publicData["curr_user_id"] %}
@@ -34,4 +34,7 @@
     <a href="/individual_restaurant/{{ restaurant['restaurant_id'] }}" class="btn btn-primary">
         Learn More
     </a>
+    {% if request.path == "/map" %}
+        <button type="button" class="btn btn-primary" onclick="goto_marker({{restaurant['lat']}}, {{restaurant['lng']}})">Go</button>
+    {% endif %}
 </article>

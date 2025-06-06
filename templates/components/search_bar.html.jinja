@@ -39,7 +39,7 @@
                         {% endif %}
                         <label class="form-check-label" for="dietary_restriction_{{ dietary_restriction['name'] }}">
                             <abbr title="{{ dietary_restriction['description'] }}">
-                                {{ dietary_restriction["name"] }}
+                                {{ dietary_restriction["name"] | title }}
                             </abbr>
                         </label>
                     </div>
@@ -53,13 +53,18 @@
                     <input class="btn btn-outline-secondary" onclick="clearPriceFilterSettings()" type="button" value="X">
                 </span>
                 </h3>
-                <div class="input-group">
-                    <span class="input-group-text" id="price_min_filter_label">Min</span>
-                    <input class ="price-filter" type="number" name="price_min_filter" value="{{ request.args.get('price_min_filter', '') }}">
-                    
-                    <span class="input-group-text" id="price_min_filter_label">Max</span>
-                    <input class ="price-filter" type="number" name="price_max_filter" value="{{ request.args.get('price_max_filter', '') }}">
-                </div>
+                <section class="row">
+                    <div class="input-group col">
+                        <span class="input-group-text" id="price_min_filter_label">Min</span>
+                        <input class ="price-filter form-control" type="number" name="price_min_filter" value="{{ request.args.get('price_min_filter', '') }}">
+                        
+                    </div>
+                    <div class="input-group col">
+                        <span class="input-group-text" id="price_min_filter_label">Max</span>
+                        <input class ="price-filter form-control" type="number" name="price_max_filter" value="{{ request.args.get('price_max_filter', '') }}">
+                    </div>                
+                </section>
+
                 <div class="form-check">
                     {% if request.args.get('exact_price_toggle') %}
                         <input name = "exact_price_toggle" class="form-check-input" type="checkbox" value="1" id="exact_price_toggle_checkBox" checked>

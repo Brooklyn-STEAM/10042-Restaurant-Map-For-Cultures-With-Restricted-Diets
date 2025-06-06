@@ -47,7 +47,7 @@ def generate_maxPriceFilterSQL(max_price, exact_price):
         else:
             maxPrice_operator = " <= "
 
-        max_priceFilter_SQL = f"(min_cost {maxPrice_operator} {max_price})"
+        max_priceFilter_SQL = f"(max_cost {maxPrice_operator} {max_price})"
     else:
         max_priceFilter_SQL = ""
 
@@ -283,13 +283,17 @@ class Browser:
     
     def calc_offsetInt(self, current_page):
         # OFFSET INT
-        offset_int = (current_page - 1) * 10
+        pageM1 = current_page - 1
+        if pageM1 < 0:
+            pageM1 = 0
+        offset_int = pageM1 * 10
         return int(offset_int)
     
     def generate_results(self, section, offset_int):
         # COLUMN SQL
         results_SQL = str(generate_columnSQL(self.limit, self.current_route, self.current_user, section, offset_int))
-
+        print("jmmm")
+        print(f"results_SQL: {results_SQL}")
         # COLUMN LIST
         self.cursor.execute(results_SQL)
         results_list = self.cursor.fetchall() 
@@ -672,6 +676,7 @@ def restaurant_review_update(restaurant_id):
 
 
 @app.route("/map" , methods=["POST", "GET"])
+@flask_login.login_required
 def map_page():
     conn = connect_db()
     cursor = conn.cursor()
@@ -696,6 +701,7 @@ def map_page():
 
 
 @app.route("/contact" , methods=["POST", "GET"])
+@flask_login.login_required
 def contact_page():
     conn = connect_db()
     cursor = conn.cursor()
@@ -740,9 +746,9 @@ def contact_page():
     conn.close()
     return render_template("contact_page.html.jinja", receiverOptions_list = receiverData_list)
 
-@app.route("/about_us" , methods=["POST", "GET"])
-def about_us_page():
-    return render_template("about_us_page.html.jinja")
+# @app.route("/about_us" , methods=["POST", "GET"])
+# def about_us_page():
+#     return render_template("about_us_page.html.jinja")
 
 # @app.route("/cart")
 # @flask_login.login_required

@@ -1,0 +1,147 @@
+/* ANCHOR - Resto Card */
+.OE-card-design-resto{
+    display: inline-block;
+    width: 18rem;
+    max-height: fit-content;
+  }
+
+/* ANCHOR - Resto Card Groups*/
+
+
+/* ANCHOR - Pagination */
+.OE-menu-pagination{
+    width: fit-content;
+    height: 100%;
+  
+    padding: 0px;
+    list-style: none;
+  
+    display: flex;
+    flex-direction: row;
+  
+  
+    & > li{
+        width: 4rem;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+  
+        border-top: 2px solid black;
+        border-bottom: 2px solid black;;
+        border-right: 2px solid black;
+  
+  
+        &:first-child{
+            border-left: 2px solid black;
+            border-top-left-radius: 20px;
+            border-bottom-left-radius: 20px;
+        }
+  
+        &:last-child{
+            border-top-right-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+  
+  
+  
+        & > *{
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            vertical-align: middle;
+            background: none;
+            border: none;
+        }
+  
+        & input[type="number"] input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+    }
+}
+
+/* ANCHOR - Search Bar */
+.filter-opition {
+    display: inline-block;
+    width: 300px;
+    margin-right: 50px;
+}
+
+/* ANCHOR - Mini Browser */
+#map-container{
+    display: flex;
+    flex-direction: column;
+
+
+    & > button{
+        flex-grow: 1;
+    }
+}
+
+
+
+
+.aside-browser{
+    position: absolute;
+    z-index: 1;
+    right: 0px;
+    top: 0px;
+
+    width: 40%;
+    height: 100%;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    @media only screen and (max-width: 400px) {
+        width: 60%;
+    }
+
+    & > *{
+        background-color: aliceblue;
+        padding: 0px 2vw 0px;
+        border: 2px solid black;
+    }
+
+    & > .header-browser-searchbar{
+
+        & .input-group{
+        margin-bottom: 0px;
+        }
+
+        & > #accordion-miniBrowser-toogleBtn{
+        width: 100%;
+        }
+    }
+
+    & > #accordion-miniBrowser{
+
+
+        & > .section-browser-body{
+        max-height: 100%;
+        padding-bottom: 100px;
+
+
+            & > .section-browser-searchs:has(>*), .section-browser-favorites:has(>*), .section-browser-recommendations:has(>*){
+                width: 100%;
+                min-height: 400px;
+                height: 50vmin;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    }
+}
+/* ANCHOR - Images */
+.OE-img{
+    &.img-resto{
+        width: 100%;
+        aspect-ratio: 1 / 1;
+  
+        object-fit: cover;
+        left: 50%;
+    }
+  
+    &:hover {
+        object-fit: contain;
+    }
+  
+}
