@@ -746,9 +746,9 @@ def contact_page():
     conn.close()
     return render_template("contact_page.html.jinja", receiverOptions_list = receiverData_list)
 
-@app.route("/about_us" , methods=["POST", "GET"])
-def about_us_page():
-    return render_template("about_us_page.html.jinja")
+# @app.route("/about_us" , methods=["POST", "GET"])
+# def about_us_page():
+#     return render_template("about_us_page.html.jinja")
 
 # @app.route("/cart")
 # @flask_login.login_required
